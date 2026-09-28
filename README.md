@@ -1,4 +1,4 @@
-# Sagroeurop — Agricultural Banking Platform
+# Sagroeurope — Agricultural Banking Platform
 
 A full-featured agricultural banking platform built with **vanilla HTML, CSS, and JavaScript** on the frontend and **Supabase** (PostgreSQL + Auth + Row Level Security) on the backend. No frontend frameworks, no build step.
 

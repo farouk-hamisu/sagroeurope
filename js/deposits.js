@@ -1,4 +1,4 @@
-// Sagroeurop — Deposits module
+// Sagroeurope — Deposits module
 (async function () {
   await AppShell.init({ title: 'Deposits' });
   const user = Auth.user;

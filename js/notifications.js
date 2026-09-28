@@ -1,4 +1,4 @@
-// Sagroeurop — Notifications module
+// Sagroeurope — Notifications module
 (async function () {
   await AppShell.init({ title: 'Notifications' });
   const user = Auth.user;

@@ -1,4 +1,4 @@
-// Sagroeurop — Live exchange rate module (Frankfurter API)
+// Sagroeurope — Live exchange rate module (Frankfurter API)
 // Shared by bitcoin.js and dashboard.js
 var ExchangeRates = (function () {
   var cache = {};

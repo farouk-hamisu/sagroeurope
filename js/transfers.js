@@ -1,4 +1,4 @@
-// Sagroeurop — Transfers hub: local, international transfers + crypto withdrawals
+// Sagroeurope — Transfers hub: local, international transfers + crypto withdrawals
 (async function () {
   await AppShell.init({ title: 'Transfers' });
   const user = Auth.user;

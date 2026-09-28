@@ -1,4 +1,4 @@
-// Sagroeurop — Minimal canvas chart helpers (line + bar + doughnut). No dependencies.
+// Sagroeurope — Minimal canvas chart helpers (line + bar + doughnut). No dependencies.
 (function (global) {
   'use strict';
 

@@ -1,4 +1,4 @@
-// Sagroeurop — Security PIN setup / change for existing accounts.
+// Sagroeurope — Security PIN setup / change for existing accounts.
 (function () {
   'use strict';
 

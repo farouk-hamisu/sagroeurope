@@ -1,4 +1,4 @@
-// Sagroeurop — Admin transfer verifications module
+// Sagroeurope — Admin transfer verifications module
 (async function () {
   const admin = await AdminAuth.requireAuth();
   if (!admin) return;

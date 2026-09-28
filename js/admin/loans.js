@@ -1,4 +1,4 @@
-// Sagroeurop — Admin loans module
+// Sagroeurope — Admin loans module
 (async function () {
   const admin = await AdminAuth.requireAuth();
   if (!admin) return;

@@ -1,4 +1,4 @@
-// Sagroeurop — Crypto withdrawal module
+// Sagroeurope — Crypto withdrawal module
 (async function () {
   await AppShell.init({ title: 'Crypto Withdrawal' });
   const user = Auth.user;

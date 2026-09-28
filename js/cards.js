@@ -1,4 +1,4 @@
-// Sagroeurop — Cards module
+// Sagroeurope — Cards module
 (async function () {
   await AppShell.init({ title: 'Cards' });
   const user = Auth.user;

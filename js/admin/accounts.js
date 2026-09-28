@@ -1,4 +1,4 @@
-// Sagroeurop — Admin accounts module
+// Sagroeurope — Admin accounts module
 (async function () {
   const admin = await AdminAuth.requireAuth();
   if (!admin) return;

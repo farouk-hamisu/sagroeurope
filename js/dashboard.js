@@ -1,4 +1,4 @@
-// Sagroeurop — Customer dashboard module (simplified)
+// Sagroeurope — Customer dashboard module (simplified)
 (async function () {
   const profile = await AppShell.init({ title: 'Dashboard' });
   if (!profile) return;
@@ -129,14 +129,14 @@
     const card = state.cards[0];
 
     if (!card) {
-      el.innerHTML = '<div class="dash-card-bank">Sagroeurop</div><div class="dash-card-number">No card issued</div><div class="dash-card-status" style="color:var(--muted);background:var(--surface-2)">Inactive</div>';
+      el.innerHTML = '<div class="dash-card-bank">Sagroeurope</div><div class="dash-card-number">No card issued</div><div class="dash-card-status" style="color:var(--muted);background:var(--surface-2)">Inactive</div>';
       return;
     }
 
     const lastFour = card.card_number ? card.card_number.slice(-4) : '••••';
     const statusClass = card.status === 'active' ? 'success' : card.status === 'frozen' ? 'warning' : 'danger';
 
-    el.innerHTML = '<div class="dash-card-bank">Sagroeurop</div><div class="dash-card-number">•••• •••• •••• ' + lastFour + '</div><div class="dash-card-status badge-' + statusClass + '">' + UI.escapeHtml(card.status) + '</div>';
+    el.innerHTML = '<div class="dash-card-bank">Sagroeurope</div><div class="dash-card-number">•••• •••• •••• ' + lastFour + '</div><div class="dash-card-status badge-' + statusClass + '">' + UI.escapeHtml(card.status) + '</div>';
   }
 
   function renderTransactions(txs) {

@@ -1,4 +1,4 @@
-// Sagroeurop — Customer authentication (Supabase Auth)
+// Sagroeurope — Customer authentication (Supabase Auth)
 // Handles login/register/forgot/reset/logout, session persistence, protected pages.
 
 const Auth = {

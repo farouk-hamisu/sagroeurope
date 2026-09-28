@@ -1,4 +1,4 @@
-// Sagroeurop — Admin dashboard module
+// Sagroeurope — Admin dashboard module
 (async function () {
   const admin = await AdminAuth.requireAuth();
   if (!admin) return;

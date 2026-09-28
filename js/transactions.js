@@ -1,4 +1,4 @@
-// Sagroeurop — Transactions module
+// Sagroeurope — Transactions module
 (async function () {
   await AppShell.init({ title: 'Transactions' });
   const user = Auth.user;
