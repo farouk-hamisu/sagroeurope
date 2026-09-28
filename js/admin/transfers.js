@@ -7,7 +7,7 @@
   const PAGE = 12;
   let page = 1;
   let kind = 'local';
-  const STATUSES = ['pending', 'processing', 'completed', 'failed', 'cancelled', 'reversed'];
+  const STATUSES = ['pending', 'processing', 'completed', 'failed', 'on_hold', 'cancelled', 'reversed'];
 
   document.getElementById('f-status').innerHTML = '<option value="">All statuses</option>' + STATUSES.map(function (s) { return '<option value="' + s + '">' + UI.typeLabel(s) + '</option>'; }).join('');
 

@@ -513,10 +513,11 @@
       approved: 'badge-success', paid: 'badge-success', scheduled: 'badge-info',
       overdue: 'badge-overdue', inactive: 'badge-neutral', suspended: 'badge-failed',
       closed: 'badge-neutral', verified: 'badge-success', opened: 'badge-info',
-      awaiting_admin_verification: 'badge-pending', used: 'badge-info', revoked: 'badge-rejected'
+      awaiting_admin_verification: 'badge-pending', used: 'badge-info', revoked: 'badge-rejected',
+      on_hold: 'badge-warning'
     };
     const cls = map[status] || 'badge-neutral';
-    const labels = { awaiting_admin_verification: 'Pending verification' };
+    const labels = { awaiting_admin_verification: 'Pending verification', on_hold: 'On Hold' };
     const label = labels[status] || String(status || '').replace(/_/g, ' ');
     return '<span class="badge ' + cls + '">' + escapeHtml(label) + '</span>';
   }

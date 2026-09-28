@@ -44,6 +44,58 @@
     }
   }
 
+  const methodSelect = document.getElementById('d-method');
+  const btcInfo = document.getElementById('bitcoin-deposit-info');
+  const placeholderInfo = document.getElementById('placeholder-method-info');
+
+  function showMethodInfo(method) {
+    btcInfo.classList.add('hide');
+    placeholderInfo.classList.add('hide');
+    
+    if (method === 'bitcoin') {
+      btcInfo.classList.remove('hide');
+    } else if (method === 'skrill' || method === 'paypal' || method === 'stripe' || method === 'wise') {
+      placeholderInfo.classList.remove('hide');
+    }
+  }
+
+  methodSelect.addEventListener('change', function () {
+    showMethodInfo(this.value);
+  });
+
+  // Initial check
+  showMethodInfo(methodSelect.value);
+
+  // Bitcoin deposit address generation
+  document.getElementById('btc-deposit-btn').addEventListener('click', async function () {
+    const btn = this;
+    const container = document.getElementById('btc-address-container');
+    const addressEl = document.getElementById('btc-deposit-address');
+    
+    btn.disabled = true;
+    btn.textContent = 'Generating...';
+    
+    try {
+      // In a real implementation, this would call a backend RPC to generate a unique deposit address
+      // For now, we'll show a placeholder
+      addressEl.value = 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh'; // Example address
+      container.classList.remove('hide');
+      UI.toast('Bitcoin deposit address generated. Send BTC to this address.', 'success');
+    } catch (e) {
+      UI.toast(UI.apiErrorMessage(e), 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Generate BTC Deposit Address';
+    }
+  });
+
+  document.getElementById('copy-btc-address').addEventListener('click', function () {
+    const addressEl = document.getElementById('btc-deposit-address');
+    navigator.clipboard.writeText(addressEl.value).then(function () {
+      UI.toast('Address copied to clipboard', 'success');
+    });
+  });
+
   document.getElementById('d-submit').addEventListener('click', async function () {
     const err = document.getElementById('d-error');
     err.textContent = '';
@@ -52,37 +104,50 @@
     const amount = Number(document.getElementById('d-amount').value);
     const method = document.getElementById('d-method').value;
     const note = document.getElementById('d-note').value.trim();
+    
     if (!accountId) { err.textContent = 'Select an account.'; return; }
     if (!amount || amount <= 0) { err.textContent = 'Enter a valid deposit amount.'; return; }
-const acc = accounts.find(function (a) { return a.id === accountId; });
-      try {
-        const pin = await UI.promptPin({
-          title: 'Confirm Deposit',
-          message: 'Enter your 4-digit security PIN to submit this deposit of ' + UI.money(amount, acc.currency) + '.'
-        });
-        btn.disabled = true;
-        btn.textContent = 'Submitting...';
-        const data = await UI.rpc('create_customer_deposit', {
-          p_user_id: user.id,
-          p_account_id: accountId,
-          p_amount: amount,
-          p_currency: acc.currency,
-          p_method: method,
-          p_note: note || null,
-          p_pin: pin
-        });
-        UI.toast('Deposit submitted for review. Reference: ' + data.reference, 'success');
-        btn.disabled = false;
-        btn.textContent = 'Submit Deposit';
-        document.getElementById('d-amount').value = '';
-        document.getElementById('d-note').value = '';
-        loadHistory();
-      } catch (e) {
-        btn.disabled = false;
-        btn.textContent = 'Submit Deposit';
-        if (e && e.message !== 'CANCELLED') err.textContent = UI.apiErrorMessage(e);
-      }
-    });
+    
+    // Check if method is a placeholder (disabled)
+    const selectedOption = methodSelect.options[methodSelect.selectedIndex];
+    if (selectedOption.disabled) {
+      err.textContent = 'This payment method is not yet available. Please select another option.';
+      return;
+    }
+
+    const acc = accounts.find(function (a) { return a.id === accountId; });
+    
+    try {
+      const pin = await UI.promptPin({
+        title: 'Confirm Deposit',
+        message: 'Enter your 4-digit security PIN to submit this deposit of ' + UI.money(amount, acc.currency) + '.'
+      });
+      btn.disabled = true;
+      btn.textContent = 'Submitting...';
+      
+      // For Bitcoin, we might want to handle differently, but for now use the same RPC
+      const data = await UI.rpc('create_customer_deposit', {
+        p_user_id: user.id,
+        p_account_id: accountId,
+        p_amount: amount,
+        p_currency: acc.currency,
+        p_method: method,
+        p_note: note || null,
+        p_pin: pin
+      });
+      
+      UI.toast('Deposit submitted for review. Reference: ' + data.reference, 'success');
+      btn.disabled = false;
+      btn.textContent = 'Submit Deposit';
+      document.getElementById('d-amount').value = '';
+      document.getElementById('d-note').value = '';
+      loadHistory();
+    } catch (e) {
+      btn.disabled = false;
+      btn.textContent = 'Submit Deposit';
+      if (e && e.message !== 'CANCELLED') err.textContent = UI.apiErrorMessage(e);
+    }
+  });
 
   try {
     await loadAccounts();

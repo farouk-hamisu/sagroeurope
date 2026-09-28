@@ -188,11 +188,8 @@ const bank = document.getElementById('r-bank').value.trim() || 'Sagroeurope';
       document.getElementById('done-ref').textContent = transfer.reference;
       document.getElementById('done-amount').textContent = UI.money(amount, acc.currency);
       document.getElementById('done-name').textContent = state.recipient.name;
-      // Show verification notice
-      const verifyNotice = document.getElementById('verify-notice');
-      if (verifyNotice) verifyNotice.classList.remove('hide');
       showStep(4);
-      UI.toast('Transfer submitted. Awaiting verification code.', 'success');
+      UI.toast('Transfer submitted successfully.', 'success');
     } catch (e) {
       btn.disabled = false;
       btn.textContent = 'Confirm & Send';

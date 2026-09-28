@@ -157,29 +157,25 @@
       });
       btn.disabled = true;
       btn.textContent = 'Submitting...';
-      await UI.transferFlow({
-        title: 'International Transfer',
-        subtitle: state.beneficiary.name + ' · ' + UI.money(amount, acc.currency),
-        transferType: 'international_transfer',
-        submit: function () {
-          return UI.rpc('create_international_transfer', {
-            p_user_id: user.id,
-            p_from_account_id: fromId,
-            p_recipient_name: state.beneficiary.name,
-            p_recipient_bank: state.beneficiary.bank,
-            p_recipient_account_number: state.beneficiary.account,
-            p_swift_code: state.beneficiary.swift,
-            p_recipient_country: state.beneficiary.country,
-            p_amount: amount,
-            p_currency: acc.currency,
-            p_purpose: purpose || null,
-            p_pin: pin,
-            p_request_id: requestId
-          });
-        }
+      const transfer = await UI.rpc('create_international_transfer', {
+        p_user_id: user.id,
+        p_from_account_id: fromId,
+        p_recipient_name: state.beneficiary.name,
+        p_recipient_bank: state.beneficiary.bank,
+        p_recipient_account_number: state.beneficiary.account,
+        p_swift_code: state.beneficiary.swift,
+        p_recipient_country: state.beneficiary.country,
+        p_amount: amount,
+        p_currency: acc.currency,
+        p_purpose: purpose || null,
+        p_pin: pin,
+        p_request_id: requestId
       });
+      UI.toast('International transfer submitted successfully. Reference: ' + transfer.reference, 'success');
       btn.disabled = false;
       btn.textContent = 'Confirm & Submit';
+      // Redirect to transfers page
+      setTimeout(function () { window.location.href = 'transfers.html'; }, 1500);
     } catch (e) {
       btn.disabled = false;
       btn.textContent = 'Confirm & Submit';

@@ -112,7 +112,7 @@ function renderAdminShell(title) {
     '</aside>' +
     '<div class="app-main">' +
       '<header class="app-header">' +
-        '<button class="menu-btn" id="admin-menu-btn">' + icon('menu') + '</button>' +
+        '<button class="menu-btn" id="admin-menu-btn" style="color: var(--primary);">' + icon('menu') + '</button>' +
         '<div class="hdr-title" id="admin-title">' + UI.escapeHtml(title || 'Admin') + '</div>' +
         '<div class="spacer"></div>' +
         '<span class="badge ' + (AdminAuth.admin && AdminAuth.admin.role === 'super_admin' ? 'badge-gold' : 'badge-info') + '">' + UI.escapeHtml(AdminAuth.admin ? AdminAuth.admin.role : '') + '</span>' +

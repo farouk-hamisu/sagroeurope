@@ -137,25 +137,20 @@
       });
       btn.disabled = true;
       btn.textContent = 'Submitting...';
-      await UI.transferFlow({
-        title: 'Crypto Withdrawal',
-        subtitle: amount + ' ' + asset.asset + ' → ' + wallet,
-        transferType: 'crypto_withdrawal',
-        submit: function () {
-          return UI.rpc('create_crypto_withdrawal', {
-            p_user_id: user.id,
-            p_from_account_id: acc.id,
-            p_asset: asset.asset,
-            p_network: asset.network,
-            p_wallet_address: wallet,
-            p_amount: amount,
-            p_pin: pin,
-            p_request_id: requestId
-          });
-        }
+      const withdrawal = await UI.rpc('create_crypto_withdrawal', {
+        p_user_id: user.id,
+        p_from_account_id: acc.id,
+        p_asset: asset.asset,
+        p_network: asset.network,
+        p_wallet_address: wallet,
+        p_amount: amount,
+        p_pin: pin,
+        p_request_id: requestId
       });
+      UI.toast('Crypto withdrawal submitted successfully. Reference: ' + withdrawal.reference, 'success');
       btn.disabled = false;
       btn.textContent = 'Confirm & Submit';
+      setTimeout(function () { window.location.href = 'transfers.html'; }, 1500);
     } catch (e) {
       btn.disabled = false;
       btn.textContent = 'Confirm & Submit';

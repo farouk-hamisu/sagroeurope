@@ -150,6 +150,7 @@ ul { margin: 0; padding: 0; list-style: none; }
 .badge-failed, .badge-rejected, .badge-cancelled, .badge-blocked, .badge-expired { background: var(--danger-soft); color: var(--danger); }
 .badge-reversed { background: var(--danger-soft); color: var(--danger); }
 .badge-frozen, .badge-under_review, .badge-overdue { background: var(--warning-soft); color: var(--warning); }
+.badge-warning { background: var(--warning-soft); color: var(--warning); }
 
 /* ---------- Tables ---------- */
 .table-wrap { overflow-x: auto; }
@@ -164,6 +165,8 @@ table.table { width: 100%; border-collapse: collapse; font-size: 14px; }
 .table .row-link { cursor: pointer; }
 .table .amount-credit { color: var(--success); font-weight: 600; }
 .table .amount-debit { color: var(--text); font-weight: 600; }
+.table tbody tr.failed-row { background: var(--danger-soft); }
+.table tbody tr.failed-row:hover { background: var(--danger-soft); }
 
 /* ---------- Toast ---------- */
 .toast-container { position: fixed; top: 18px; right: 18px; z-index: 3000; display: flex; flex-direction: column; gap: 10px; max-width: 380px; }
@@ -373,7 +376,7 @@ table.table { width: 100%; border-collapse: collapse; font-size: 14px; }
 .site-nav a:hover { color: var(--primary); }
 .site-nav a.active { color: var(--primary); }
 .site-actions { display: flex; align-items: center; gap: 10px; }
-.nav-toggle { display: none; background: none; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; cursor: pointer; }
+.nav-toggle { display: none; background: none; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; cursor: pointer; color: var(--primary); }
 
 /* Hero */
 .hero { background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 60%, #1a7f3d 100%); color: #fff; padding: 96px 0 0; overflow: hidden; }
@@ -624,7 +627,7 @@ table.table { width: 100%; border-collapse: collapse; font-size: 14px; }
 .app-header .hdr-search input { padding-left: 36px; }
 .app-header .hdr-search .icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--muted); }
 .app-header .spacer { flex: 1; }
-.app-content { padding: 26px 26px 110px; flex: 1; }
+.app-content { padding: 26px 26px calc(110px + env(safe-area-inset-bottom, 0px)); flex: 1; }
 
 /* user chip in header */
 .user-chip { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 6px 8px; border-radius: 8px; }
@@ -653,7 +656,7 @@ table.table { width: 100%; border-collapse: collapse; font-size: 14px; }
   position: fixed; left: 50%; transform: translateX(-50%); bottom: 16px; z-index: 1300;
   display: flex; align-items: center; gap: 4px;
   background: var(--surface); border: 1px solid var(--border-strong); border-radius: 999px;
-  padding: 8px; box-shadow: 0 12px 34px rgba(18,58,126,.22);
+  padding: 8px; box-shadow: 0 12px 34px rgba(26, 127, 61, .22);
 }
 .bottom-nav a {
   display: flex; flex-direction: column; align-items: center; gap: 3px;
@@ -664,7 +667,7 @@ table.table { width: 100%; border-collapse: collapse; font-size: 14px; }
 .bottom-nav a:hover { color: var(--primary); background: var(--primary-soft); }
 .bottom-nav a.is-blue { background: var(--primary); color: #fff; }
 .bottom-nav a.is-blue:hover { background: var(--primary-dark); color: #fff; }
-.bottom-nav a.active { background: var(--primary); color: #fff; box-shadow: 0 4px 14px rgba(15,27,45,.4); }
+.bottom-nav a.active { background: var(--primary); color: #fff; box-shadow: 0 4px 14px rgba(26, 127, 61, .4); }
 .bottom-nav a.is-blue.active { background: var(--surface); color: var(--primary); }
 .bottom-nav a .icon { width: 20px; height: 20px; }
 .bottom-nav a .icon svg { width: 20px; height: 20px; }
@@ -678,6 +681,14 @@ table.table { width: 100%; border-collapse: collapse; font-size: 14px; }
 
 @media (min-width: 768px) {
   .bottom-nav { display: none; }
+}
+
+/* Ensure content doesn't get hidden behind bottom nav on mobile */
+@media (max-width: 767px) {
+  body:has(.bottom-nav) .app-content,
+  body:has(.bottom-nav) .dash-layout {
+    padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px)) !important;
+  }
 }
 
 /* ============================================================

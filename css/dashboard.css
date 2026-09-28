@@ -7,7 +7,7 @@
 .dash-layout {
   max-width: 480px;
   margin: 0 auto;
-  padding: 0 16px 100px;
+  padding: 0 16px calc(100px + env(safe-area-inset-bottom, 0px));
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -579,7 +579,7 @@
 @media (min-width: 768px) {
   .dash-layout {
     max-width: 600px;
-    padding: 0 24px 100px;
+    padding: 0 24px calc(100px + env(safe-area-inset-bottom, 0px));
     gap: 24px;
   }
   
@@ -619,7 +619,7 @@
 @media (min-width: 1024px) {
   .dash-layout {
     max-width: 700px;
-    padding: 0 32px 100px;
+    padding: 0 32px calc(100px + env(safe-area-inset-bottom, 0px));
     gap: 28px;
   }
   
