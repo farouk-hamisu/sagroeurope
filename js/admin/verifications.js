@@ -1,4 +1,4 @@
-// marvintlc — Admin transfer verifications module
+// Sagroeurop — Admin transfer verifications module
 (async function () {
   const admin = await AdminAuth.requireAuth();
   if (!admin) return;

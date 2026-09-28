@@ -1,4 +1,4 @@
-// marvintlc — Admin users module
+// Sagroeurop — Admin users module
 (async function () {
   const admin = await AdminAuth.requireAuth();
   if (!admin) return;

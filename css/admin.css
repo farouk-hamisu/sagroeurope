@@ -1,5 +1,5 @@
 /* ============================================================
-   marvintlc — admin.css
+   Sagroeurop — admin.css
    Admin portal specific styling
    ============================================================ */
 
@@ -26,7 +26,7 @@
 
 /* user detail / customer management layout */
 .customer-masthead {
-  background: linear-gradient(120deg, var(--primary), #1c4f9c); color: #fff; border-radius: var(--radius);
+  background: linear-gradient(120deg, var(--primary), #22c55e); color: #fff; border-radius: var(--radius);
   padding: 26px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin-bottom: 24px;
 }
 .customer-masthead .avatar { width: 64px; height: 64px; font-size: 26px; background: rgba(255,255,255,.2); color: #fff; }
@@ -42,7 +42,7 @@
 .customer-tabs button.active { color: var(--primary); border-bottom-color: var(--accent); }
 
 /* admin login */
-.admin-login-body { background: linear-gradient(135deg, #0f2239, #123a7e); }
+.admin-login-body { background: linear-gradient(135deg, var(--primary-dark), var(--primary)); }
 .admin-login-body .auth-brand span.label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; }
 
 /* audit log */

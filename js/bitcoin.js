@@ -1,4 +1,4 @@
-// marvintlc — Bitcoin balance and USD/BTC swap
+// Sagroeurop — Bitcoin balance and USD/BTC swap
 (async function () {
   await AppShell.init({ title: 'Bitcoin' });
   const user = Auth.user;

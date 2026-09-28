@@ -1,4 +1,4 @@
-// marvintlc — Minimal canvas chart helpers (line + bar + doughnut). No dependencies.
+// Sagroeurop — Minimal canvas chart helpers (line + bar + doughnut). No dependencies.
 (function (global) {
   'use strict';
 

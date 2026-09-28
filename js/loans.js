@@ -1,4 +1,4 @@
-// marvintlc — Loans module
+// Sagroeurop — Loans module
 (async function () {
   await AppShell.init({ title: 'Loans' });
   const user = Auth.user;

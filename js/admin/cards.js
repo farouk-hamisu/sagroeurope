@@ -1,4 +1,4 @@
-// marvintlc — Admin cards module
+// Sagroeurop — Admin cards module
 (async function () {
   const admin = await AdminAuth.requireAuth();
   if (!admin) return;

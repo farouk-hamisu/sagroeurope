@@ -1,4 +1,4 @@
-// marvintlc — Admin audit logs module
+// Sagroeurop — Admin audit logs module
 (async function () {
   const admin = await AdminAuth.requireAuth();
   if (!admin) return;

@@ -1,4 +1,4 @@
-// marvintlc — Transactions module
+// Sagroeurop — Transactions module
 (async function () {
   await AppShell.init({ title: 'Transactions' });
   const user = Auth.user;

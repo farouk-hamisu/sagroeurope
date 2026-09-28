@@ -1,4 +1,4 @@
-// marvintlc — Admin settings module
+// Sagroeurop — Admin settings module
 (async function () {
   const admin = await AdminAuth.requireAuth();
   if (!admin) return;

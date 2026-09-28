@@ -1,6 +1,6 @@
-# marvintlc — Online Banking Platform
+# Sagroeurop — Agricultural Banking Platform
 
-A full-featured online banking platform built with **vanilla HTML, CSS, and JavaScript** on the frontend and **Supabase** (PostgreSQL + Auth + Row Level Security) on the backend. No frontend frameworks, no build step.
+A full-featured agricultural banking platform built with **vanilla HTML, CSS, and JavaScript** on the frontend and **Supabase** (PostgreSQL + Auth + Row Level Security) on the backend. No frontend frameworks, no build step.
 
 ## Features
 
@@ -57,8 +57,8 @@ const APP_CONFIG = {
 
 | Role | Email | Password |
 |------|-------|----------|
-| Customer | `demo@marvintlc.com` | `Demo@1234` |
-| Admin | `admin@marvintlc.com` | `Admin@123` |
+| Customer | `demo@sagroeurop.com` | `Demo@1234` |
+| Admin | `admin@sagroeurop.com` | `Admin@123` |
 
 The seed creates a demo customer with checking/savings/EUR accounts, transactions, cards, deposits, swaps, loans, and notifications.
 
