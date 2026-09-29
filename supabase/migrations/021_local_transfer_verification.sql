@@ -11,19 +11,18 @@ alter table public.local_transfers
   drop constraint if exists local_transfers_status_check;
 alter table public.local_transfers
   add constraint local_transfers_status_check check (status in (
-    'pending', 'awaiting_admin_verification', 'processing', 'completed',
-    'failed', 'cancelled', 'rejected', 'reversed'
+    'pending', 'processing', 'completed', 'failed', 'cancelled', 'rejected', 'reversed', 'on_hold'
   ));
 
--- 2. Expand transfer_verification_codes transfer_type check
+-- 2. Remove local_transfer from transfer_verification_codes (no longer needs verification)
 alter table public.transfer_verification_codes
   drop constraint if exists transfer_verification_codes_transfer_type_check;
 alter table public.transfer_verification_codes
   add constraint transfer_verification_codes_transfer_type_check check (transfer_type in (
-    'international_transfer', 'crypto_withdrawal', 'local_transfer'
+    'international_transfer', 'crypto_withdrawal'
   ));
 
--- 3. Fix create_local_transfer — no debit, status = awaiting_admin_verification
+-- 3. Fix create_local_transfer — complete immediately, status = completed
 create or replace function public.create_local_transfer(
   p_user_id               uuid,
   p_from_account_id       uuid,
@@ -47,6 +46,7 @@ declare
   v_fee numeric;
   v_transfer public.local_transfers;
   v_sender_name text;
+  v_dest public.accounts%rowtype;
 begin
   if p_user_id is distinct from auth.uid() then
     raise exception 'FORBIDDEN';
@@ -70,19 +70,47 @@ begin
 
   v_fee := 0;
 
+  -- Debit sender account immediately
+  perform public.apply_balance_change(p_from_account_id, -p_amount, p_currency);
+
+  -- Create transfer with completed status
   insert into public.local_transfers (
     reference, user_id, from_account_id, recipient_name, recipient_account_number,
     recipient_bank, amount, currency, fee, description, status, completed_at
   ) values (
     public.generate_reference('LT'), p_user_id, p_from_account_id, p_recipient_name,
     p_recipient_account_number, p_recipient_bank, p_amount, p_currency, v_fee,
-    p_description, 'awaiting_admin_verification', null
+    p_description, 'completed', now()
   ) returning * into v_transfer;
 
+  -- Record transaction for sender
+  perform public.record_transaction(
+    p_user_id, p_from_account_id, 'local_transfer', 'debit', p_amount, p_currency,
+    'completed', coalesce(p_description, 'Local transfer'), v_sender_name,
+    p_recipient_name, v_fee, v_transfer.id);
+
+  -- Credit internal recipient if applicable
+  if p_internal_recipient is not null then
+    select * into v_dest from public.accounts
+      where user_id = p_internal_recipient and currency = p_currency
+      order by created_at limit 1;
+    if found then
+      perform public.apply_balance_change(v_dest.id, p_amount, p_currency);
+      perform public.record_transaction(
+        p_internal_recipient, v_dest.id, 'local_transfer', 'credit', p_amount, p_currency,
+        'completed', 'Incoming local transfer', p_recipient_name, v_sender_name, 0, v_transfer.id);
+      perform public.notify_user(p_internal_recipient,
+        'Transfer received',
+        'You received ' || to_char(p_amount, 'FM9,999,999,990.00') || ' ' || p_currency ||
+        ' from ' || coalesce(v_sender_name, 'a customer') || '.',
+        'transfer');
+    end if;
+  end if;
+
   perform public.notify_user(p_user_id,
-    'Transfer submitted',
+    'Transfer completed',
     'Your transfer of ' || to_char(p_amount, 'FM9,999,999,990.00') || ' ' || p_currency ||
-    ' to ' || p_recipient_name || ' is awaiting verification. Ref: ' || v_transfer.reference || '.',
+    ' to ' || p_recipient_name || ' has been completed. Ref: ' || v_transfer.reference || '.',
     'transfer');
 
   return v_transfer;
@@ -461,3 +489,61 @@ end;
 $$;
 
 grant execute on function public.admin_reject_transfer(text, text, uuid, text) to anon, authenticated;
+
+-- Admin function to put a transfer on hold
+create or replace function public.admin_hold_transfer(
+  p_transfer_type text,
+  p_transfer_id   uuid,
+  p_admin_id      uuid,
+  p_reason        text default null
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_status text;
+  v_old jsonb;
+  v_user_id uuid;
+  v_ref text;
+begin
+  if p_transfer_type not in ('international_transfer', 'local_transfer', 'crypto_withdrawal') then
+    raise exception 'INVALID_TYPE';
+  end if;
+
+  if p_transfer_type = 'international_transfer' then
+    select status, to_jsonb(t), t.user_id, t.reference into v_status, v_old, v_user_id, v_ref
+      from public.international_transfers t where id = p_transfer_id for update;
+  elsif p_transfer_type = 'local_transfer' then
+    select status, to_jsonb(t), t.user_id, t.reference into v_status, v_old, v_user_id, v_ref
+      from public.local_transfers t where id = p_transfer_id for update;
+  else
+    select status, to_jsonb(t), t.user_id, t.reference into v_status, v_old, v_user_id, v_ref
+      from public.crypto_withdrawals t where id = p_transfer_id for update;
+  end if;
+  if v_old is null then
+    raise exception 'TRANSFER_NOT_FOUND';
+  end if;
+  if v_status <> 'completed' and v_status <> 'processing' then
+    raise exception 'TRANSFER_CANNOT_BE_HELD';
+  end if;
+
+  if p_transfer_type = 'international_transfer' then
+    update public.international_transfers set status = 'on_hold', updated_at = now() where id = p_transfer_id;
+  elsif p_transfer_type = 'local_transfer' then
+    update public.local_transfers set status = 'on_hold', updated_at = now() where id = p_transfer_id;
+  else
+    update public.crypto_withdrawals set status = 'on_hold', updated_at = now() where id = p_transfer_id;
+  end if;
+
+  perform public.notify_user(v_user_id, 'Transaction Failed',
+    'Your transfer ' || v_ref || ' has been placed on hold.' ||
+    case when p_reason is not null and p_reason <> '' then ' Reason: ' || p_reason else '' end,
+    'transfer');
+
+  return jsonb_build_object('status', 'ok', 'reference', v_ref);
+end;
+$$;
+
+grant execute on function public.admin_hold_transfer(text, text, uuid, text) to anon, authenticated;

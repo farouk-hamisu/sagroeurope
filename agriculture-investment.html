@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agriculture Investment — Sagroeurope</title>
+  <link rel="icon" type="image/svg+xml" href="assets/logos/favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/marketing.css">
+</head>
+<body>
+<div class="page-loader" id="page-loader" role="status" aria-live="polite">
+    <div class="pl-inner">
+      <div class="pl-orbit">
+        <span class="pl-ring"></span>
+        <span class="pl-ring pl-ring--2"></span>
+        <span class="pl-ring pl-ring--3"></span>
+        <span class="pl-core"></span>
+      </div>
+      <div class="pl-track"><span class="pl-progress"></span></div>
+      <p class="pl-status" id="pl-status">Preparing your workspace</p>
+    </div>
+  </div>
+  <div id="page-root">
+    <div class="dash-layout">
+      <!-- Header -->
+      <div class="dash-header">
+        <div class="dash-header-left">
+          <div id="dash-avatar" class="dash-avatar"></div>
+          <div class="dash-greeting">
+            <p id="dash-user-name" class="dash-user-name"></p>
+            <h1 id="dash-greeting-text" class="dash-greeting-text"></h1>
+          </div>
+        </div>
+        <div class="dash-header-right">
+          <a href="notifications.html" class="dash-notif-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Investment Balance Card -->
+      <div class="investment-balance-card" id="investment-balance-card">
+        <div class="investment-balance-header">
+          <div class="investment-balance-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          </div>
+          <div>
+            <div class="investment-balance-label">Agriculture Investment Balance</div>
+            <div class="investment-balance-currency">Primary: EUR | Secondary: USD</div>
+          </div>
+        </div>
+        <div class="investment-balance-amount" id="investment-total-balance">€0.00</div>
+        <div class="investment-balance-secondary" id="investment-total-usd">$0.00</div>
+        <div class="investment-return-info">
+          <span class="return-rate">📈 78% Annual Return</span>
+          <span class="return-detail" id="investment-projected">Projected: €0.00 / $0.00 per year</span>
+        </div>
+      </div>
+
+      <!-- Investment Opportunities -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h3 class="card-title">Investment Opportunities</h3>
+            <div class="card-subtitle">Cross-border agricultural investment programs</div>
+          </div>
+          <span class="badge badge-success">78% Annual Return</span>
+        </div>
+        <div class="investment-grid" id="investment-opportunities">
+          <div class="loading-block"><div class="spinner"></div><span>Loading opportunities...</span></div>
+        </div>
+      </div>
+
+      <!-- My Investments -->
+      <div class="card">
+        <div class="card-header">
+          <div><h3 class="card-title">My Investments</h3><div class="card-subtitle">Track your agriculture investment portfolio</div></div>
+          <a href="#" class="dash-view-all" id="invest-btn">Invest Now</a>
+        </div>
+        <div id="my-investments">
+          <div class="loading-block"><div class="spinner"></div><span>Loading investments...</span></div>
+        </div>
+      </div>
+
+      <!-- Investment Returns History -->
+      <div class="card">
+        <div class="card-header"><div><h3 class="card-title">Returns History</h3><div class="card-subtitle">Your investment earnings over time</div></div></div>
+        <div id="returns-history">
+          <div class="loading-block"><div class="spinner"></div><span>Loading returns...</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/icons.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/navigation.js"></script>
+  <script src="js/agriculture-investment.js"></script>
+</body>
+</html>

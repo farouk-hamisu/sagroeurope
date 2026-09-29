@@ -290,6 +290,133 @@
 .mk-auth-float--bl { bottom: 14%; left: 8%; }
 .mk-auth-float--br { bottom: 10%; right: 10%; }
 
+/* ---------- PIN Setup Page Redesign ---------- */
+.pin-setup-header {
+  text-align: center;
+  margin-bottom: 32px;
+  padding-top: 8px;
+}
+.pin-shield {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 20px;
+  background: linear-gradient(135deg, var(--mk-navy), var(--mk-navy-2));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 
+    0 8px 32px rgba(26, 127, 61, 0.3),
+    inset 0 1px 0 rgba(255,255,255,0.1),
+    0 0 0 1px rgba(74, 222, 128, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+.pin-shield::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(74, 222, 128, 0.15), transparent 60%);
+  pointer-events: none;
+}
+.pin-shield::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  border: 1px solid rgba(74, 222, 128, 0.3);
+  pointer-events: none;
+}
+.pin-shield svg {
+  width: 32px;
+  height: 32px;
+  color: #4ade80;
+  stroke-width: 2;
+  filter: drop-shadow(0 2px 4px rgba(26, 127, 61, 0.4));
+}
+.pin-setup-header h1 {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--mk-ink);
+  margin: 0 0 6px;
+  letter-spacing: -.02em;
+}
+.pin-setup-header .mk-auth-sub {
+  color: var(--mk-muted);
+  font-size: 15px;
+  margin: 0;
+  max-width: 320px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Green accent border for the auth card on PIN setup page */
+.mk-auth-panel:has(.pin-setup-header) .mk-auth-card,
+.mk-auth-card:has(.pin-setup-header) {
+  position: relative;
+}
+.mk-auth-panel:has(.pin-setup-header) .mk-auth-card::before,
+.mk-auth-card:has(.pin-setup-header)::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, var(--mk-navy), var(--mk-navy-2), #4ade80);
+  z-index: -1;
+  opacity: 0.15;
+  filter: blur(8px);
+}
+.mk-auth-panel:has(.pin-setup-header) .mk-auth-card::after,
+.mk-auth-card:has(.pin-setup-header)::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  border: 1px solid rgba(74, 222, 128, 0.25);
+  pointer-events: none;
+}
+
+/* PIN input improvements for setup page */
+.pin-inputs .pin-digit {
+  border: 2px solid var(--mk-line);
+  background: var(--surface);
+  transition: all 0.15s ease;
+}
+.pin-inputs .pin-digit:focus {
+  border-color: var(--mk-navy);
+  box-shadow: 
+    0 0 0 4px color-mix(in srgb, var(--mk-navy) 20%, transparent),
+    0 4px 16px rgba(26, 127, 61, 0.12);
+  transform: translateY(-2px);
+}
+.pin-inputs .pin-digit.is-filled {
+  border-color: var(--mk-navy);
+  background: color-mix(in srgb, var(--mk-navy) 8%, var(--surface));
+  box-shadow: 0 2px 8px rgba(26, 127, 61, 0.1);
+}
+.pin-inputs.has-error .pin-digit {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--danger) 18%, transparent);
+}
+
+/* Form field improvements */
+.mk-auth-card .field label {
+  font-weight: 600;
+  color: var(--mk-ink);
+  margin-bottom: 8px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+/* Responsive adjustments for PIN setup */
+@media (max-width: 480px) {
+  .pin-shield { width: 64px; height: 64px; }
+  .pin-shield svg { width: 28px; height: 28px; }
+  .pin-setup-header h1 { font-size: 24px; }
+}
+
 /* ---------- Header / footer refinements ---------- */
 .site-header { background: rgba(255,255,255,.96); border-bottom: 1px solid var(--mk-line); }
 .site-header .container { height: 78px; }

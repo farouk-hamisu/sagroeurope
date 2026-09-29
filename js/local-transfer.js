@@ -185,11 +185,37 @@ const bank = document.getElementById('r-bank').value.trim() || 'Sagroeurope';
         p_internal_recipient: internalRecipient || null,
         p_pin: pin
       });
-      document.getElementById('done-ref').textContent = transfer.reference;
-      document.getElementById('done-amount').textContent = UI.money(amount, acc.currency);
-      document.getElementById('done-name').textContent = state.recipient.name;
+      
+      // Populate professional receipt
+      const now = new Date();
+      document.getElementById('receipt-ref').textContent = transfer.reference;
+      document.getElementById('receipt-date').textContent = UI.formatDateTime(now);
+      document.getElementById('receipt-from').textContent = acc.account_name + ' · ' + acc.account_number;
+      document.getElementById('receipt-to').textContent = state.recipient.name;
+      document.getElementById('receipt-bank').textContent = state.recipient.bank;
+      document.getElementById('receipt-account').textContent = state.recipient.account;
+      document.getElementById('receipt-amount').textContent = UI.money(amount, acc.currency);
+      document.getElementById('receipt-fee').textContent = UI.money(0, acc.currency);
+      document.getElementById('receipt-total').textContent = UI.money(amount, acc.currency);
+      document.getElementById('receipt-desc').textContent = desc || '—';
+      
+      // Store receipt data for sharing
+      window.currentReceipt = {
+        reference: transfer.reference,
+        date: now.toISOString(),
+        from: acc.account_name + ' · ' + acc.account_number,
+        to: state.recipient.name,
+        bank: state.recipient.bank,
+        account: state.recipient.account,
+        amount: amount,
+        currency: acc.currency,
+        fee: 0,
+        total: amount,
+        desc: desc || '—'
+      };
+      
       showStep(4);
-      UI.toast('Transfer submitted successfully.', 'success');
+      UI.toast('Transfer completed successfully.', 'success');
     } catch (e) {
       btn.disabled = false;
       btn.textContent = 'Confirm & Send';
@@ -198,6 +224,32 @@ const bank = document.getElementById('r-bank').value.trim() || 'Sagroeurope';
   });
 
   document.getElementById('step3-back').addEventListener('click', function () { showStep(2); });
+
+  // Share receipt function
+  window.shareReceipt = async function () {
+    const receipt = window.currentReceipt;
+    if (!receipt) return;
+    
+    const shareData = {
+      title: 'Sagroeurope Transfer Receipt',
+      text: `Transfer Completed - ${receipt.reference}\n\nAmount: ${UI.money(receipt.amount, receipt.currency)}\nTo: ${receipt.to}\nDate: ${UI.formatDateTime(receipt.date)}\nReference: ${receipt.reference}`,
+      url: window.location.href
+    };
+    
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(shareData.text);
+        UI.toast('Receipt copied to clipboard', 'success');
+      }
+    } catch (e) {
+      if (e.name !== 'AbortError') {
+        UI.toast('Unable to share receipt', 'warning');
+      }
+    }
+  };
 
   await load();
   PageLoader.hide();

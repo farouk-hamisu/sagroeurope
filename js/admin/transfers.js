@@ -43,6 +43,7 @@
           '<td data-label="Date">' + UI.formatDateTime(t.created_at) + '</td>' +
           '<td data-label="Actions"><div class="row-actions">' +
             '<button class="row-action" data-view="' + t.id + '" title="View">' + ICONS.eye + '</button>' +
+            '<button class="row-action" data-hold="' + t.id + '" title="Place on hold" style="color:var(--warning)">' + ICONS.pause + '</button>' +
             '<button class="row-action" data-status="' + t.id + '" title="Update status">' + ICONS.edit + '</button>' +
           '</div></td></tr>';
       }).join('') +
@@ -64,6 +65,15 @@
           return '<div class="detail-item"><div class="k">' + f[0] + '</div><div class="v">' + UI.escapeHtml(f[1]) + '</div></div>';
         }).join('');
         UI.openModal('<div class="detail-grid">' + fields + '</div>', { title: 'Transfer Details' });
+      });
+    });
+    el.querySelectorAll('[data-hold]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        const t = rows.find(function (x) { return x.id === b.getAttribute('data-hold'); });
+        if (!confirm('Place transfer ' + t.reference + ' on hold? This will mark it as failed for the user.')) return;
+        adminApi('admin_hold_transfer', { p_transfer_type: kind === 'local' ? 'local_transfer' : 'international_transfer', p_transfer_id: t.id, p_reason: 'Placed on hold by administrator' })
+          .then(function () { UI.toast('Transfer placed on hold.', 'success'); load(); })
+          .catch(function (e) { UI.toast(UI.apiErrorMessage(e), 'error'); });
       });
     });
     el.querySelectorAll('[data-status]').forEach(function (b) {

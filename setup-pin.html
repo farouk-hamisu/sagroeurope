@@ -7,6 +7,7 @@
   <link rel="icon" type="image/svg+xml" href="assets/logos/favicon.svg">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/forms.css">
+  <link rel="stylesheet" href="css/marketing.css">
 </head>
 <body>
   <div class="mk-auth">
@@ -24,12 +25,19 @@
       <p class="mk-lead">Set a 4-digit security PIN. It protects your account and authorizes every transfer, swap and sensitive action.</p>
     </div>
     <div class="mk-auth-panel">
-      <div class="mk-auth-card">
+      <div class="mk-auth-card" style="max-width:440px">
         <div class="mk-auth-brand">
           <img src="assets/logos/logo.svg" alt="Sagroeurope">
         </div>
-        <h1 id="sp-title">Set up your security PIN</h1>
-        <p class="mk-auth-sub" id="sp-sub">Choose a 4-digit PIN you'll remember</p>
+        <div class="pin-setup-header">
+          <div class="pin-shield" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+          </div>
+          <h1 id="sp-title">Set up your security PIN</h1>
+          <p class="mk-auth-sub" id="sp-sub">Choose a 4-digit PIN you'll remember</p>
+        </div>
         <form id="pin-form" novalidate>
           <div class="field" id="current-field" style="display:none">
             <label>Current PIN</label>

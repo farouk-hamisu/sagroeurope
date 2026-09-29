@@ -10,7 +10,8 @@ const NAV_ITEMS = [
   { label: 'Crypto Withdrawal', icon: 'globe', href: 'crypto-withdrawal.html' },
   { label: 'Deposits', icon: 'deposits', href: 'deposits.html' },
   { label: 'Bitcoin', icon: 'bitcoin', href: 'bitcoin.html' },
-  { label: 'Loans', icon: 'loans', href: 'loans.html' }
+  { label: 'Loans', icon: 'loans', href: 'loans.html' },
+  { label: 'Agriculture Investment', icon: 'investment', href: 'agriculture-investment.html' }
 ];
 
 const AppShell = {
