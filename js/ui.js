@@ -517,7 +517,7 @@
       on_hold: 'badge-warning'
     };
     const cls = map[status] || 'badge-neutral';
-    const labels = { awaiting_admin_verification: 'Pending verification', on_hold: 'On Hold' };
+    const labels = { on_hold: 'On Hold' };
     const label = labels[status] || String(status || '').replace(/_/g, ' ');
     return '<span class="badge ' + cls + '">' + escapeHtml(label) + '</span>';
   }
@@ -577,7 +577,6 @@
       OUTGOING_TRANSFERS_DISABLED: 'Outgoing transfers are currently disabled on your account. Contact support for details.',
       REASON_REQUIRED: 'A reason is required to disable outgoing transfers.',
       INVALID_TYPE: 'Invalid transfer type.',
-      TRANSFER_NOT_VERIFIABLE: 'This transfer is not awaiting verification.',
       CODE_NOT_FOUND: 'Verification code not found.',
       WITHDRAWAL_NOT_FOUND: 'Withdrawal not found.',
       'Bad Request': 'The request was invalid. Please check your input.'
@@ -592,6 +591,42 @@
     }
     if (typeof err === 'string') return friendlyError(err);
     return 'An unexpected error occurred. Please try again.';
+  }
+
+  // ---------- RPC helper with proper error handling ----------
+  async function rpc(name, params) {
+    const { data, error } = await SB.rpc(name, params || {});
+    if (error) {
+      const code = (error.message || '').split('\n')[0].trim();
+      throw new Error(code);
+    }
+    return data;
+  }
+
+  // ---------- Clipboard (secure context + legacy fallback) ----------
+  async function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch (e) { /* fall through */ }
+    }
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    ta.remove();
+    return ok;
+  }
+
+  // ---------- Query params ----------
+  function qs(key) {
+    return new URLSearchParams(window.location.search).get(key);
   }
 
   // ---------- RPC helper with proper error handling ----------
@@ -980,7 +1015,7 @@
     rpc, qs, copyText, formatNumber: money,
     cardDigits, renderCardFace,
     pinBoxesHTML, mountPinInput, verifyCustomerPin, promptPin,
-    verifyTransferCode, transferFlow
+    
   };
   global.PageLoader = PageLoader;
 })(window);

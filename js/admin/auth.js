@@ -75,7 +75,6 @@ const ADMIN_NAV = [
   { label: 'Accounts', icon: 'wallet', href: 'accounts.html' },
   { label: 'Transactions', icon: 'transactions', href: 'transactions.html' },
   { label: 'Transfers', icon: 'send', href: 'transfers.html' },
-  { label: 'Verifications', icon: 'shield', href: 'verifications.html' },
   { label: 'Deposits', icon: 'deposits', href: 'deposits.html' },
   { label: 'Cards', icon: 'cards', href: 'cards.html' },
   { label: 'Currencies', icon: 'swap', href: 'currencies.html' },
