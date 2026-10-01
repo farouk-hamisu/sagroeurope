@@ -243,7 +243,6 @@ const bank = document.getElementById('r-bank').value.trim() || 'Sagroeurope';
 
       // Hide the share button during capture
       const shareBtn = document.getElementById('share-receipt-btn');
-      const actions = document.querySelector('.receipt-actions');
       if (shareBtn) shareBtn.style.display = 'none';
 
       // Capture the receipt card as canvas
@@ -252,10 +251,16 @@ const bank = document.getElementById('r-bank').value.trim() || 'Sagroeurope';
         useCORS: true,
         logging: false,
         backgroundColor: '#ffffff',
+        width: receiptCard.scrollWidth,
+        height: receiptCard.scrollHeight,
+        windowWidth: receiptCard.scrollWidth,
+        windowHeight: receiptCard.scrollHeight,
         onclone: function(clonedDoc) {
           // Hide actions in the cloned version
           const clonedActions = clonedDoc.querySelector('.receipt-actions');
           if (clonedActions) clonedActions.style.display = 'none';
+          const clonedShareBtn = clonedDoc.getElementById('share-receipt-btn');
+          if (clonedShareBtn) clonedShareBtn.style.display = 'none';
         }
       });
 

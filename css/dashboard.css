@@ -961,9 +961,6 @@
 .return-rate {
   font-size: 14px;
   font-weight: 700;
-  background: rgba(255,255,255,0.2);
-  padding: 6px 12px;
-  border-radius: 999px;
   display: inline-block;
   width: fit-content;
 }
@@ -974,8 +971,8 @@
 
 .investment-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
   margin-top: 16px;
 }
 .investment-card {
@@ -994,8 +991,9 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px;
   margin-bottom: 12px;
+  flex-wrap: wrap;
 }
 .investment-icon {
   width: 48px;
@@ -1233,5 +1231,29 @@
   }
   .investment-details {
     grid-template-columns: 1fr;
+  }
+  .investment-grid {
+    grid-template-columns: 1fr;
+  }
+  .investment-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .investment-card-header .badge {
+    align-self: flex-start;
+  }
+  .investment-item-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+  .investment-details {
+    grid-template-columns: 1fr;
+  }
+  .investment-item-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+  .investment-item-header {
+    flex-direction: column;
+    gap: 8px;
   }
 }
