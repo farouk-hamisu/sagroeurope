@@ -227,6 +227,32 @@ const bank = document.getElementById('r-bank').value.trim() || 'Sagroeurope';
 
   document.getElementById('step3-back').addEventListener('click', function () { showStep(2); });
 
+  // Share receipt function
+  window.shareReceipt = async function () {
+    const receipt = window.currentReceipt;
+    if (!receipt) return;
+    
+    const shareData = {
+      title: 'Sagroeurope Transfer Receipt',
+      text: `Transfer Completed - ${receipt.reference}\n\nAmount: ${UI.money(receipt.amount, receipt.currency)}\nTo: ${receipt.to}\nDate: ${UI.formatDateTime(receipt.date)}\nReference: ${receipt.reference}`,
+      url: window.location.href
+    };
+    
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(shareData.text);
+        UI.toast('Receipt copied to clipboard', 'success');
+      }
+    } catch (e) {
+      if (e.name !== 'AbortError') {
+        UI.toast('Unable to share receipt', 'warning');
+      }
+    }
+  };
+
   await load();
   PageLoader.hide();
 })();

@@ -888,6 +888,17 @@
   .receipt-header { flex-direction: column; gap: 16px; text-align: center; }
 }
 
+/* Share button specific styling */
+#share-receipt-btn {
+  background: var(--primary-soft);
+  color: var(--primary);
+  border: 1px solid var(--primary);
+}
+#share-receipt-btn:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
 /* ============================================================
    AGRICULTURE INVESTMENT PAGE
    ============================================================ */
