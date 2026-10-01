@@ -227,26 +227,77 @@ const bank = document.getElementById('r-bank').value.trim() || 'Sagroeurope';
 
   document.getElementById('step3-back').addEventListener('click', function () { showStep(2); });
 
-  // Share receipt function
+  // Share receipt as image
   window.shareReceipt = async function () {
     const receipt = window.currentReceipt;
     if (!receipt) return;
-    
-    const shareData = {
-      title: 'Sagroeurope Transfer Receipt',
-      text: `Transfer Completed - ${receipt.reference}\n\nAmount: ${UI.money(receipt.amount, receipt.currency)}\nTo: ${receipt.to}\nDate: ${UI.formatDateTime(receipt.date)}\nReference: ${receipt.reference}`,
-      url: window.location.href
-    };
-    
+
+    const receiptCard = document.querySelector('.receipt-card');
+    if (!receiptCard) {
+      UI.toast('Receipt not found', 'warning');
+      return;
+    }
+
     try {
-      if (navigator.share) {
+      UI.toast('Generating receipt image...', 'info');
+
+      // Hide the share button during capture
+      const shareBtn = document.getElementById('share-receipt-btn');
+      const actions = document.querySelector('.receipt-actions');
+      if (shareBtn) shareBtn.style.display = 'none';
+
+      // Capture the receipt card as canvas
+      const canvas = await html2canvas(receiptCard, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+        onclone: function(clonedDoc) {
+          // Hide actions in the cloned version
+          const clonedActions = clonedDoc.querySelector('.receipt-actions');
+          if (clonedActions) clonedActions.style.display = 'none';
+        }
+      });
+
+      // Show the share button again
+      if (shareBtn) shareBtn.style.display = '';
+
+      // Convert to blob
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png', 0.95));
+
+      // Prepare file for sharing
+      const file = new File([blob], `receipt-${receipt.reference}.png`, { type: 'image/png' });
+
+      const shareData = {
+        title: 'Sagroeurope Transfer Receipt',
+        text: `Transfer Completed - ${receipt.reference}`,
+        files: [file]
+      };
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share(shareData);
+        UI.toast('Receipt shared successfully!', 'success');
+      } else if (navigator.share) {
+        // Fallback: share without file if files not supported
+        await navigator.share({
+          title: 'Sagroeurope Transfer Receipt',
+          text: `Transfer Completed - ${receipt.reference}\n\nAmount: ${UI.money(receipt.amount, receipt.currency)}\nTo: ${receipt.to}\nDate: ${UI.formatDateTime(receipt.date)}\nReference: ${receipt.reference}`,
+          url: window.location.href
+        });
       } else {
-        // Fallback: copy to clipboard
-        await navigator.clipboard.writeText(shareData.text);
-        UI.toast('Receipt copied to clipboard', 'success');
+        // Fallback: download the image
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `receipt-${receipt.reference}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        UI.toast('Receipt image downloaded', 'success');
       }
     } catch (e) {
+      console.error('Share error:', e);
       if (e.name !== 'AbortError') {
         UI.toast('Unable to share receipt', 'warning');
       }
