@@ -514,10 +514,11 @@
       overdue: 'badge-overdue', inactive: 'badge-neutral', suspended: 'badge-failed',
       closed: 'badge-neutral', verified: 'badge-success', opened: 'badge-info',
       used: 'badge-info', revoked: 'badge-rejected',
-      on_hold: 'badge-warning'
+      on_hold: 'badge-warning',
+      awaiting_admin_verification: 'badge-completed'
     };
     const cls = map[status] || 'badge-neutral';
-    const labels = { on_hold: 'On Hold' };
+    const labels = { awaiting_admin_verification: 'Completed', on_hold: 'On Hold' };
     const label = labels[status] || String(status || '').replace(/_/g, ' ');
     return '<span class="badge ' + cls + '">' + escapeHtml(label) + '</span>';
   }
