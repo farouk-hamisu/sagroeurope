@@ -86,85 +86,103 @@
     </div>
 
     <div id="step-4" class="card hide">
-      <div class="receipt-header">
-        <div class="receipt-brand">
-          <img src="assets/logos/logo.svg" alt="Sagroeurope" class="receipt-logo">
-          <div>
-            <strong>Sagroeurope</strong>
-            <span class="text-sm text-muted">Agricultural Banking & Financial Services</span>
+      <div class="receipt-card">
+        <div class="receipt-header">
+          <div class="receipt-brand">
+            <div class="receipt-logo">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            </div>
+            <div>
+              <strong>Sagroeurope</strong>
+              <span class="text-sm text-muted">Agricultural Banking & Financial Services</span>
+            </div>
+          </div>
+          <div class="receipt-status completed">
+            <span class="check-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+            </span>
+            <strong>Transfer Completed ✅</strong>
           </div>
         </div>
-        <div class="receipt-status completed">
-          <span class="check-icon">✓</span>
-          <strong>Transfer Completed</strong>
-        </div>
-      </div>
-      
-      <div class="receipt-body">
-        <div class="receipt-section">
-          <div class="receipt-label">Reference</div>
-          <div class="receipt-value" id="receipt-ref">—</div>
-        </div>
-        <div class="receipt-section">
-          <div class="receipt-label">Date & Time</div>
-          <div class="receipt-value" id="receipt-date">—</div>
-        </div>
-        <div class="receipt-section">
-          <div class="receipt-label">Status</div>
-          <div class="receipt-value"><span class="badge badge-completed">Completed</span></div>
-        </div>
         
-        <div class="receipt-divider"></div>
-        
-        <div class="receipt-section">
-          <div class="receipt-label">From</div>
-          <div class="receipt-value" id="receipt-from">—</div>
-        </div>
-        <div class="receipt-section">
-          <div class="receipt-label">To</div>
-          <div class="receipt-value" id="receipt-to">—</div>
-        </div>
-        <div class="receipt-section">
-          <div class="receipt-label">Recipient Bank</div>
-          <div class="receipt-value" id="receipt-bank">—</div>
-        </div>
-        <div class="receipt-section">
-          <div class="receipt-label">Recipient Account</div>
-          <div class="receipt-value" id="receipt-account">—</div>
-        </div>
-        
-        <div class="receipt-divider"></div>
-        
-        <div class="receipt-amount-section">
-          <div class="receipt-amount-label">Amount Sent</div>
-          <div class="receipt-amount-value" id="receipt-amount">—</div>
-          <div class="receipt-fee">
-            <span class="receipt-fee-label">Transfer Fee</span>
-            <span class="receipt-fee-value" id="receipt-fee">$0.00</span>
+        <div class="receipt-meta">
+          <div class="meta-row">
+            <span class="meta-label">Receipt Number</span>
+            <span class="meta-value" id="receipt-ref">—</span>
           </div>
-          <div class="receipt-total">
-            <span class="receipt-total-label">Total Debited</span>
-            <span class="receipt-total-value" id="receipt-total">—</span>
+          <div class="meta-row">
+            <span class="meta-label">Date & Time</span>
+            <span class="meta-value" id="receipt-date">—</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-label">Status</span>
+            <span class="meta-value"><span class="badge badge-completed">Completed</span></span>
           </div>
         </div>
         
         <div class="receipt-divider"></div>
         
-        <div class="receipt-section">
-          <div class="receipt-label">Description</div>
-          <div class="receipt-value" id="receipt-desc">—</div>
+        <div class="receipt-party-section">
+          <div class="party-card from">
+            <div class="party-header">
+              <span class="party-tag">From</span>
+            </div>
+            <div class="party-details">
+              <div class="party-name" id="receipt-from-name">—</div>
+              <div class="party-account" id="receipt-from-account">—</div>
+            </div>
+          </div>
+          <div class="party-divider"></div>
+          <div class="party-card to">
+            <div class="party-header">
+              <span class="party-tag">To</span>
+            </div>
+            <div class="party-details">
+              <div class="party-name" id="receipt-to-name">—</div>
+              <div class="party-bank" id="receipt-bank">—</div>
+              <div class="party-account" id="receipt-account">—</div>
+            </div>
+          </div>
         </div>
-      </div>
-      
-      <div class="receipt-footer">
-        <p class="text-sm text-muted">This receipt confirms that the transfer has been completed successfully. Funds have been debited from your account.</p>
-        <div class="receipt-actions">
-          <button class="btn btn-outline" id="share-receipt-btn" onclick="shareReceipt()">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="19" r="3"/><path d="M8.59 13.51l1.42 1.42"/><path d="M15.42 6.49l1.42 1.42"/></svg>
-            Share Receipt
-          </button>
-          <a href="transfers.html" class="btn btn-outline">View All Transfers</a>
-          <a href="dashboard.html" class="btn btn-primary">Back to Dashboard</a>
+        
+        <div class="receipt-divider"></div>
+        
+        <div class="receipt-amount-card">
+          <div class="amount-row">
+            <div class="amount-col">
+              <span class="amount-label">Amount Sent</span>
+              <div class="amount-value" id="receipt-amount">—</div>
+            </div>
+            <div class="amount-col">
+              <span class="amount-label">Transfer Fee</span>
+              <div class="amount-value fee" id="receipt-fee">$0.00</div>
+            </div>
+            <div class="amount-col total">
+              <span class="amount-label">Total Debited</span>
+              <div class="amount-value" id="receipt-total">—</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="receipt-divider"></div>
+        
+        <div class="receipt-meta">
+          <div class="meta-row">
+            <span class="meta-label">Description</span>
+            <span class="meta-value" id="receipt-desc">—</span>
+          </div>
+        </div>
+        
+        <div class="receipt-footer">
+          <p class="receipt-disclaimer">This receipt confirms that the transfer has been completed successfully. Funds have been debited from your account.</p>
+          <div class="receipt-actions">
+            <button class="btn btn-outline" id="share-receipt-btn" onclick="shareReceipt()">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="19" r="3"/><path d="M8.59 13.51l1.42 1.42"/><path d="M15.42 6.49l1.42 1.42"/></svg>
+              Share Receipt
+            </button>
+            <a href="transfers.html" class="btn btn-outline">View All Transfers</a>
+            <a href="dashboard.html" class="btn btn-primary">Back to Dashboard</a>
+          </div>
         </div>
       </div>
     </div>

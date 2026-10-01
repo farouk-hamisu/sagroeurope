@@ -55,8 +55,8 @@
       }).join('');
 
       const curSel = document.getElementById('r-currency');
-      curSel.innerHTML = '<option value="USD">USD ($)</option>';
-      curSel.value = 'USD';
+      curSel.innerHTML = '<option value="EUR">EUR (€)</option><option value="USD">USD ($)</option>';
+      curSel.value = 'EUR';
 
       // fee
       const settingsRes = await SB.from('system_settings').select('value').eq('key', 'intl_transfer_fee');
@@ -120,7 +120,7 @@
 
   document.getElementById('t-amount').addEventListener('input', function () {
     const amt = Number(this.value) || 0;
-    const cur = document.getElementById('t-currency-tag').dataset.cur || 'USD';
+    const cur = document.getElementById('t-currency-tag').dataset.cur || 'EUR';
     document.getElementById('t-total').textContent = UI.money(amt + state.fee, cur);
   });
 

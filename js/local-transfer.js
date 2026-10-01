@@ -51,17 +51,18 @@
         return '<option value="' + b.id + '">' + UI.escapeHtml(b.name) + ' · ' + UI.escapeHtml(b.account_number) + '</option>';
       }).join('');
 
-      // from account select — USD accounts only
-      const usdAccounts = state.accounts.filter(function (a) { return a.currency === 'USD'; });
+      // from account select — EUR and USD accounts
+      const eurUsdAccounts = state.accounts.filter(function (a) { return a.currency === 'EUR' || a.currency === 'USD'; });
       const fromSel = document.getElementById('t-from');
-      fromSel.innerHTML = usdAccounts.map(function (a) {
-        return '<option value="' + a.id + '">' + UI.escapeHtml(a.account_name) + ' · ' + UI.escapeHtml(a.account_number) + ' ($)</option>';
+      fromSel.innerHTML = eurUsdAccounts.map(function (a) {
+        const sym = APP_CONFIG.currencySymbols[a.currency] || a.currency;
+        return '<option value="' + a.id + '">' + UI.escapeHtml(a.account_name) + ' · ' + UI.escapeHtml(a.account_number) + ' (' + sym + ')</option>';
       }).join('');
 
-      // currency field — USD only, hidden
+      // currency field — EUR and USD
       const curSel = document.getElementById('r-currency');
-      curSel.innerHTML = '<option value="USD">USD ($)</option>';
-      curSel.value = 'USD';
+      curSel.innerHTML = '<option value="EUR">EUR (€)</option><option value="USD">USD ($)</option>';
+      curSel.value = 'EUR';
 
       updateBalance();
       // load transfer history into recent tab? kept simple: no
@@ -90,7 +91,7 @@
     const benId = document.getElementById('beneficiary-select').value;
     if (benId) {
       const b = state.beneficiaries.find(function (x) { return x.id === benId; });
-      state.recipient = { name: b.name, account: b.account_number, bank: b.bank_name || 'Sagroeurope', currency: b.currency || 'USD' };
+      state.recipient = { name: b.name, account: b.account_number, bank: b.bank_name || 'Sagroeurope', currency: b.currency || 'EUR' };
     } else {
       const name = document.getElementById('r-name').value.trim();
       const account = document.getElementById('r-account').value.trim();
@@ -128,7 +129,7 @@ const bank = document.getElementById('r-bank').value.trim() || 'Sagroeurope';
   document.getElementById('t-from').addEventListener('change', updateBalance);
   document.getElementById('t-amount').addEventListener('input', function () {
     const amt = Number(this.value) || 0;
-    const cur = document.getElementById('t-currency-tag').dataset.cur || 'USD';
+    const cur = document.getElementById('t-currency-tag').dataset.cur || 'EUR';
     document.getElementById('t-total').textContent = UI.money(amt, cur);
   });
 
@@ -190,8 +191,9 @@ const bank = document.getElementById('r-bank').value.trim() || 'Sagroeurope';
       const now = new Date();
       document.getElementById('receipt-ref').textContent = transfer.reference;
       document.getElementById('receipt-date').textContent = UI.formatDateTime(now);
-      document.getElementById('receipt-from').textContent = acc.account_name + ' · ' + acc.account_number;
-      document.getElementById('receipt-to').textContent = state.recipient.name;
+      document.getElementById('receipt-from-name').textContent = acc.account_name;
+      document.getElementById('receipt-from-account').textContent = acc.account_number;
+      document.getElementById('receipt-to-name').textContent = state.recipient.name;
       document.getElementById('receipt-bank').textContent = state.recipient.bank;
       document.getElementById('receipt-account').textContent = state.recipient.account;
       document.getElementById('receipt-amount').textContent = UI.money(amount, acc.currency);
