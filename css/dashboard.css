@@ -874,16 +874,7 @@
 }
 .receipt-actions .btn { flex: 1; min-width: 140px; }
 
-/* Share button specific styling */
-#share-receipt-btn {
-  background: var(--primary-soft);
-  color: var(--primary);
-  border: 1px solid var(--primary);
-}
-#share-receipt-btn:hover {
-  background: var(--primary);
-  color: #fff;
-}
+
 
 @media (max-width: 480px) {
   .receipt-party-section {
