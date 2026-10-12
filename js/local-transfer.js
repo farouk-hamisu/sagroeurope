@@ -218,6 +218,11 @@ const bank = document.getElementById('r-bank').value.trim() || 'Sagroeurope';
       
       showStep(4);
       UI.toast('Transfer completed successfully.', 'success');
+      
+      // Refresh balance in dashboard if available
+      if (window.AppShell && window.AppShell.refreshBalance) {
+        window.AppShell.refreshBalance();
+      }
     } catch (e) {
       btn.disabled = false;
       btn.textContent = 'Confirm & Send';

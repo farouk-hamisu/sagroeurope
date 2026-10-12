@@ -26,6 +26,27 @@ const AppShell = {
     el.replaceWith(wrap.firstChild);
   },
 
+  async refreshBalance() {
+    try {
+      const user = await Auth.init();
+      if (!user) return;
+      const { data } = await SB.from('account_balances')
+        .select('available_balance, ledger_balance')
+        .eq('user_id', user.id);
+      if (data) {
+        // Update dashboard balance display if present
+        const balanceEl = document.getElementById('dash-total-balance');
+        if (balanceEl) {
+          let total = 0;
+          data.forEach(b => total += Number(b.ledger_balance) || 0);
+          balanceEl.textContent = UI.money(total, 'USD');
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to refresh balance:', e);
+    }
+  },
+
   bottomNavItems() {
     return [
       { label: 'Dashboard', icon: 'dashboard', href: 'dashboard.html' },
