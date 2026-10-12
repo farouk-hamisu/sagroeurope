@@ -66,7 +66,7 @@ begin
   end if;
 
   -- Log the action
-  insert into public.audit_logs (admin_id, admin_email, action, entity_type, entity_id, old_value, new_value)
+  insert into public.audit_logs (admin_id, admin_email, action, resource, resource_id, previous_value, new_value)
   values (
     (select id from public.admin_users where email = v_email),
     v_email,
