@@ -691,7 +691,7 @@
 }
 
 /* ============================================================
-   TRANSFER RECEIPT (Professional Scotiabank-style receipt)
+   TRANSFER RECEIPT (Professional OPay-style receipt)
    ============================================================ */
 .receipt-card {
   background: var(--surface);
@@ -705,129 +705,121 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 24px 24px 20px;
+  padding: 16px 16px 12px;
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: #fff;
 }
 .receipt-brand {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
 }
 .receipt-logo {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
   background: rgba(255,255,255,0.15);
-  padding: 8px;
+  padding: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.receipt-logo svg { width: 28px; height: 28px; stroke: #fff; }
-.receipt-brand strong { font-size: 18px; color: #fff; }
-.receipt-brand .text-muted { font-size: 12px; color: rgba(255,255,255,0.8); }
+.receipt-logo svg { width: 20px; height: 20px; stroke: #fff; }
+.receipt-brand strong { font-size: 15px; color: #fff; }
+.receipt-brand .text-muted { font-size: 11px; color: rgba(255,255,255,0.8); }
 .receipt-status {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 20px;
+  gap: 6px;
+  padding: 6px 14px;
   background: rgba(255,255,255,0.15);
   color: #fff;
   border-radius: 999px;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 700;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255,255,255,0.2);
 }
-.receipt-status .check-icon {
-  width: 24px; height: 24px;
-  background: rgba(255,255,255,0.2);
-  color: #fff;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 14px;
-}
 
 .receipt-meta {
-  padding: 20px 24px;
+  padding: 14px 16px;
   background: var(--surface);
 }
 .meta-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 0;
+  padding: 8px 0;
   border-bottom: 1px solid var(--border);
 }
 .meta-row:last-child { border-bottom: none; }
 .meta-label {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--muted);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: .03em;
 }
 .meta-value {
-  font-size: 15px;
+  font-size: 13px;
   color: var(--text);
   font-weight: 500;
   text-align: right;
   word-break: break-word;
 }
-.meta-value .badge { font-size: 11px; }
+.meta-value .badge { font-size: 10px; }
 
 .receipt-divider {
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--border), transparent);
-  margin: 0 24px;
+  margin: 0 16px;
 }
 
 .receipt-party-section {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0;
-  padding: 20px 24px;
+  padding: 16px 16px;
   background: var(--surface-2);
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
 }
 .party-card {
-  padding: 16px 12px;
+  padding: 12px 8px;
 }
 .party-card:first-child { border-right: 1px solid var(--border); }
-.party-header { margin-bottom: 12px; }
+.party-header { margin-bottom: 8px; }
 .party-tag {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--muted);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .05em;
 }
-.party-name { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
-.party-bank { font-size: 13px; color: var(--muted); margin-bottom: 4px; }
-.party-account { font-size: 13px; font-weight: 600; color: var(--text); font-family: ui-monospace, monospace; }
+.party-name { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.party-bank { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+.party-account { font-size: 11px; font-weight: 600; color: var(--text); font-family: ui-monospace, monospace; }
 .party-divider {
   width: 1px;
   background: var(--border);
-  margin: 0 16px;
+  margin: 0 12px;
   align-self: stretch;
 }
 
 .receipt-amount-card {
-  padding: 24px;
+  padding: 16px;
   background: linear-gradient(135deg, var(--primary-soft) 0%, var(--surface) 100%);
   border-top: 1px solid var(--border);
 }
 .amount-row {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: 16px;
+  gap: 12px;
 }
 .amount-col {
-  padding: 16px;
+  padding: 12px;
   background: var(--surface);
-  border-radius: 12px;
+  border-radius: 10px;
   border: 1px solid var(--border);
   text-align: center;
 }
@@ -837,42 +829,42 @@
 }
 .amount-label {
   display: block;
-  font-size: 11px;
+  font-size: 10px;
   color: var(--muted);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: .05em;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 .amount-value {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 800;
   color: var(--text);
   letter-spacing: -0.01em;
 }
-.amount-col.total .amount-value { color: var(--primary); font-size: 24px; }
+.amount-col.total .amount-value { color: var(--primary); font-size: 20px; }
 .amount-col.total .amount-label { color: rgba(255,255,255,0.7); }
 .amount-value.fee { color: var(--danger); }
 
 .receipt-footer {
-  padding: 24px;
+  padding: 16px;
   background: var(--surface);
   border-top: 1px solid var(--border);
 }
 .receipt-disclaimer {
-  font-size: 12px;
+  font-size: 10px;
   color: var(--muted);
-  margin-bottom: 20px;
-  line-height: 1.6;
+  margin-bottom: 16px;
+  line-height: 1.5;
   text-align: center;
 }
 .receipt-actions {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
   justify-content: center;
 }
-.receipt-actions .btn { flex: 1; min-width: 140px; }
+.receipt-actions .btn { flex: 1; min-width: 120px; }
 
 
 

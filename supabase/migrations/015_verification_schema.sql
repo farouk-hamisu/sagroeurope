@@ -79,8 +79,7 @@ create table public.crypto_withdrawals (
     rate            numeric(20, 8) not null default 1,
     fee             numeric(20, 2) not null default 0,
     status          text not null default 'pending' check (status in (
-                      'pending', 'awaiting_admin_verification', 'processing',
-                      'completed', 'failed', 'cancelled', 'rejected', 'reversed'
+                      'pending', 'processing', 'completed', 'failed', 'cancelled', 'rejected', 'reversed'
                     )),
     completed_at    timestamptz,
     created_at      timestamptz not null default now(),
@@ -104,9 +103,10 @@ create trigger touch_crypto_wd_updated before update on public.crypto_withdrawal
 -- ---------------------------------------------------------------------------
 -- 6. Transfer verification codes (hashed, short-lived, single-use)
 -- ---------------------------------------------------------------------------
+-- Transfer verification codes (kept for potential future use, but no active transfer types require verification)
 create table public.transfer_verification_codes (
     id           uuid primary key default gen_random_uuid(),
-    transfer_type text not null check (transfer_type in ('international_transfer', 'crypto_withdrawal')),
+    transfer_type text not null check (transfer_type in ('local_transfer')),
     transfer_id  uuid not null,
     user_id      uuid not null references public.profiles (id) on delete cascade,
     code_hash    text not null,

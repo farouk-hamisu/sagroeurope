@@ -158,7 +158,7 @@ begin
   ) values (
     public.generate_reference('CW'), p_request_id, p_user_id, p_from_account_id, p_asset, p_network,
     p_wallet_address, p_amount, v_amount_fiat, v_base, v_asset.rate_usd, v_fee,
-    'awaiting_admin_verification', null
+    'completed', now()
   )
   on conflict (user_id, request_id) where request_id is not null do nothing
   returning * into v_wd;
@@ -171,9 +171,9 @@ begin
 
   if v_created then
     perform public.notify_user(p_user_id,
-      'Crypto withdrawal submitted',
+      'Crypto withdrawal completed',
       'Your withdrawal of ' || p_amount || ' ' || p_asset || ' to ' || p_wallet_address ||
-      ' was received and is awaiting administrative verification. Ref: ' || v_wd.reference || '.', 'transfer');
+      ' has been completed. Ref: ' || v_wd.reference || '.', 'transfer');
   end if;
 
   return jsonb_build_object(
@@ -246,7 +246,7 @@ begin
   ) values (
     public.generate_reference('IT'), p_request_id, p_user_id, p_from_account_id, p_recipient_name,
     p_recipient_bank, p_recipient_account_number, p_swift_code, p_recipient_country, p_purpose,
-    p_amount, p_currency, 1, v_fee, now() + interval '2 days', 'awaiting_admin_verification', null
+    p_amount, p_currency, 1, v_fee, now() + interval '2 days', 'completed', now()
   )
   on conflict (user_id, request_id) where request_id is not null do nothing
   returning * into v_xfer;
@@ -257,11 +257,20 @@ begin
     v_created := false;
   end if;
 
+  -- Debit sender account immediately
+  perform public.apply_balance_change(p_from_account_id, -(p_amount + v_fee), p_currency);
+
+  -- Record transaction for sender
+  perform public.record_transaction(
+    p_user_id, p_from_account_id, 'international_transfer', 'debit', p_amount, p_currency,
+    'completed', coalesce(p_purpose, 'International transfer'), v_sender_name,
+    p_recipient_name || ' (' || p_recipient_country || ')', v_fee, v_xfer.id);
+
   if v_created then
     perform public.notify_user(p_user_id,
-      'International transfer submitted',
+      'International transfer completed',
       'Your international transfer of ' || to_char(p_amount, 'FM9,999,999,990.00') || ' ' || p_currency ||
-      ' to ' || p_recipient_name || ' was received and is awaiting administrative verification. Ref: ' ||
+      ' to ' || p_recipient_name || ' has been completed. Ref: ' ||
       v_xfer.reference || '.', 'transfer');
   end if;
 
