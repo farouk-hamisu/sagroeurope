@@ -8,7 +8,7 @@ create extension if not exists "uuid-ossp";-- marvintlc - Migration 002
 -- ---------------------------------------------------------------------------
 -- PROFILES
 -- ---------------------------------------------------------------------------
-create table public.profiles (
+create table if not exists public.profiles (
     id            uuid primary key references auth.users (id) on delete cascade,
     email         text not null,
     full_name     text not null default '',
@@ -29,7 +29,7 @@ create table public.profiles (
 -- ---------------------------------------------------------------------------
 -- CURRENCIES
 -- ---------------------------------------------------------------------------
-create table public.currencies (
+create table if not exists public.currencies (
     id          uuid primary key default gen_random_uuid(),
     code        text not null unique,
     name        text not null,
@@ -43,7 +43,7 @@ create table public.currencies (
 -- ---------------------------------------------------------------------------
 -- EXCHANGE RATES
 -- ---------------------------------------------------------------------------
-create table public.exchange_rates (
+create table if not exists public.exchange_rates (
     id               uuid primary key default gen_random_uuid(),
     base_currency    text not null references public.currencies (code),
     quote_currency   text not null references public.currencies (code),
@@ -57,7 +57,7 @@ create table public.exchange_rates (
 -- ---------------------------------------------------------------------------
 -- ACCOUNTS
 -- ---------------------------------------------------------------------------
-create table public.accounts (
+create table if not exists public.accounts (
     id             uuid primary key default gen_random_uuid(),
     user_id        uuid not null references public.profiles (id) on delete cascade,
     account_number text not null unique,
@@ -74,7 +74,7 @@ create table public.accounts (
 -- ---------------------------------------------------------------------------
 -- ACCOUNT BALANCES
 -- ---------------------------------------------------------------------------
-create table public.account_balances (
+create table if not exists public.account_balances (
     id               uuid primary key default gen_random_uuid(),
     account_id       uuid not null references public.accounts (id) on delete cascade,
     available_balance numeric(20, 2) not null default 0 check (available_balance >= 0),
@@ -87,7 +87,7 @@ create table public.account_balances (
 -- ---------------------------------------------------------------------------
 -- TRANSACTIONS
 -- ---------------------------------------------------------------------------
-create table public.transactions (
+create table if not exists public.transactions (
     id          uuid primary key default gen_random_uuid(),
     reference   text not null unique,
     user_id     uuid not null references public.profiles (id) on delete cascade,
@@ -115,7 +115,7 @@ create table public.transactions (
 -- ---------------------------------------------------------------------------
 -- BENEFICIARIES
 -- ---------------------------------------------------------------------------
-create table public.beneficiaries (
+create table if not exists public.beneficiaries (
     id                     uuid primary key default gen_random_uuid(),
     user_id                uuid not null references public.profiles (id) on delete cascade,
     name                   text not null,
@@ -132,7 +132,7 @@ create table public.beneficiaries (
 -- ---------------------------------------------------------------------------
 -- LOCAL TRANSFERS
 -- ---------------------------------------------------------------------------
-create table public.local_transfers (
+create table if not exists public.local_transfers (
     id                      uuid primary key default gen_random_uuid(),
     reference               text not null unique,
     user_id                 uuid not null references public.profiles (id) on delete cascade,
@@ -156,7 +156,7 @@ create table public.local_transfers (
 -- ---------------------------------------------------------------------------
 -- INTERNATIONAL TRANSFERS
 -- ---------------------------------------------------------------------------
-create table public.international_transfers (
+create table if not exists public.international_transfers (
     id                       uuid primary key default gen_random_uuid(),
     reference                text not null unique,
     user_id                  uuid not null references public.profiles (id) on delete cascade,
@@ -184,7 +184,7 @@ create table public.international_transfers (
 -- ---------------------------------------------------------------------------
 -- CARDS
 -- ---------------------------------------------------------------------------
-create table public.cards (
+create table if not exists public.cards (
     id              uuid primary key default gen_random_uuid(),
     user_id         uuid not null references public.profiles (id) on delete cascade,
     account_id      uuid references public.accounts (id),
@@ -205,7 +205,7 @@ create table public.cards (
 -- ---------------------------------------------------------------------------
 -- CARD TRANSACTIONS
 -- ---------------------------------------------------------------------------
-create table public.card_transactions (
+create table if not exists public.card_transactions (
     id            uuid primary key default gen_random_uuid(),
     card_id       uuid not null references public.cards (id) on delete cascade,
     user_id       uuid not null references public.profiles (id) on delete cascade,
@@ -220,7 +220,7 @@ create table public.card_transactions (
 -- ---------------------------------------------------------------------------
 -- DEPOSITS
 -- ---------------------------------------------------------------------------
-create table public.deposits (
+create table if not exists public.deposits (
     id          uuid primary key default gen_random_uuid(),
     reference   text not null unique,
     user_id     uuid not null references public.profiles (id) on delete cascade,
@@ -239,7 +239,7 @@ create table public.deposits (
 -- ---------------------------------------------------------------------------
 -- CURRENCY SWAPS
 -- ---------------------------------------------------------------------------
-create table public.currency_swaps (
+create table if not exists public.currency_swaps (
     id            uuid primary key default gen_random_uuid(),
     reference     text not null unique,
     user_id       uuid not null references public.profiles (id) on delete cascade,
@@ -260,7 +260,7 @@ create table public.currency_swaps (
 -- ---------------------------------------------------------------------------
 -- LOAN PRODUCTS
 -- ---------------------------------------------------------------------------
-create table public.loan_products (
+create table if not exists public.loan_products (
     id            uuid primary key default gen_random_uuid(),
     name          text not null,
     description   text,
@@ -276,7 +276,7 @@ create table public.loan_products (
 -- ---------------------------------------------------------------------------
 -- LOAN APPLICATIONS
 -- ---------------------------------------------------------------------------
-create table public.loan_applications (
+create table if not exists public.loan_applications (
     id              uuid primary key default gen_random_uuid(),
     reference       text not null unique,
     user_id         uuid not null references public.profiles (id) on delete cascade,
@@ -299,7 +299,7 @@ create table public.loan_applications (
 -- ---------------------------------------------------------------------------
 -- LOAN REPAYMENTS
 -- ---------------------------------------------------------------------------
-create table public.loan_repayments (
+create table if not exists public.loan_repayments (
     id                  uuid primary key default gen_random_uuid(),
     loan_application_id uuid not null references public.loan_applications (id) on delete cascade,
     user_id             uuid not null references public.profiles (id) on delete cascade,
@@ -317,7 +317,7 @@ create table public.loan_repayments (
 -- ---------------------------------------------------------------------------
 -- NOTIFICATIONS
 -- ---------------------------------------------------------------------------
-create table public.notifications (
+create table if not exists public.notifications (
     id          uuid primary key default gen_random_uuid(),
     user_id     uuid references public.profiles (id) on delete cascade,
     title       text not null,
@@ -333,7 +333,7 @@ create table public.notifications (
 -- ---------------------------------------------------------------------------
 -- ADMIN ROLES
 -- ---------------------------------------------------------------------------
-create table public.admin_roles (
+create table if not exists public.admin_roles (
     id          uuid primary key default gen_random_uuid(),
     name        text not null unique,
     permissions text[] not null default '{}',
@@ -343,7 +343,7 @@ create table public.admin_roles (
 -- ---------------------------------------------------------------------------
 -- ADMIN USERS
 -- ---------------------------------------------------------------------------
-create table public.admin_users (
+create table if not exists public.admin_users (
     id            uuid primary key default gen_random_uuid(),
     email         text not null unique,
     password_hash text not null,
@@ -357,7 +357,7 @@ create table public.admin_users (
 -- ---------------------------------------------------------------------------
 -- ADMIN SESSIONS
 -- ---------------------------------------------------------------------------
-create table public.admin_sessions (
+create table if not exists public.admin_sessions (
     id         uuid primary key default gen_random_uuid(),
     admin_id   uuid not null references public.admin_users (id) on delete cascade,
     token      text not null unique,
@@ -369,7 +369,7 @@ create table public.admin_sessions (
 -- ---------------------------------------------------------------------------
 -- AUDIT LOGS
 -- ---------------------------------------------------------------------------
-create table public.audit_logs (
+create table if not exists public.audit_logs (
     id              uuid primary key default gen_random_uuid(),
     admin_id        uuid references public.admin_users (id) on delete set null,
     admin_email     text,
@@ -385,7 +385,7 @@ create table public.audit_logs (
 -- ---------------------------------------------------------------------------
 -- SYSTEM SETTINGS
 -- ---------------------------------------------------------------------------
-create table public.system_settings (
+create table if not exists public.system_settings (
     id          uuid primary key default gen_random_uuid(),
     key         text not null unique,
     value       jsonb not null,
@@ -4632,7 +4632,7 @@ alter table public.profiles
 -- ---------------------------------------------------------------------------
 -- 4. Supported crypto assets (asset + network pairs)
 -- ---------------------------------------------------------------------------
-create table public.crypto_assets (
+create table if not exists public.crypto_assets (
     asset         text not null,
     network       text not null,
     asset_label   text not null,
@@ -4659,7 +4659,7 @@ on conflict (asset, network) do nothing;
 -- ---------------------------------------------------------------------------
 -- 5. Cryptocurrency withdrawals
 -- ---------------------------------------------------------------------------
-create table public.crypto_withdrawals (
+create table if not exists public.crypto_withdrawals (
     id              uuid primary key default gen_random_uuid(),
     reference       text not null unique,
     request_id      text,
@@ -4699,7 +4699,7 @@ create trigger touch_crypto_wd_updated before update on public.crypto_withdrawal
 -- 6. Transfer verification codes (hashed, short-lived, single-use)
 -- ---------------------------------------------------------------------------
 -- Transfer verification codes (kept for potential future use, but no active transfer types require verification)
-create table public.transfer_verification_codes (
+create table if not exists public.transfer_verification_codes (
     id           uuid primary key default gen_random_uuid(),
     transfer_type text not null check (transfer_type in ('local_transfer')),
     transfer_id  uuid not null,
@@ -4726,7 +4726,7 @@ revoke all on table public.transfer_verification_codes from anon, authenticated,
 -- ---------------------------------------------------------------------------
 -- 7. Transfer verification attempt history (for admins + audit)
 -- ---------------------------------------------------------------------------
-create table public.transfer_verification_logs (
+create table if not exists public.transfer_verification_logs (
     id           uuid primary key default gen_random_uuid(),
     transfer_type text not null,
     transfer_id  uuid not null,
@@ -6994,307 +6994,3 @@ END;
 $$;
 
 GRANT EXECUTE ON FUNCTION public.admin_update_loan_application(text, uuid, text, text) TO anon, authenticated;
--- Migration 024: Make user tasktrust00@gmail.com an admin
--- This migration promotes an existing user to admin with super_admin role
-
--- First, check if the user exists in profiles and get their ID
--- Then create or update admin_users entry with super_admin role
-
-do $$
-declare
-  v_user_id uuid;
-  v_role_id uuid;
-  v_admin_id uuid;
-  v_email text := 'tasktrust00@gmail.com';
-  v_password_hash text;
-begin
-  -- Get the user ID from profiles table
-  select id into v_user_id
-  from public.profiles
-  where email = v_email;
-
-  if v_user_id is null then
-    raise notice 'User with email % not found in profiles table', v_email;
-    return;
-  end if;
-
-  -- Get the super_admin role ID
-  select id into v_role_id
-  from public.admin_roles
-  where name = 'super_admin';
-
-  if v_role_id is null then
-    raise exception 'super_admin role not found in admin_roles table';
-  end if;
-
-  -- Generate a secure random password hash for the admin user
-  -- Using a default password that should be changed on first login
-  -- The password will be: Admin@2024!ChangeMe
-  v_password_hash := public.admin_hash_password('Admin@2024!ChangeMe');
-
-  -- Check if admin user already exists
-  select id into v_admin_id
-  from public.admin_users
-  where email = v_email;
-
-  if v_admin_id is not null then
-    -- Update existing admin user to super_admin role
-    update public.admin_users
-    set role_id = (select id from public.admin_roles where name = 'super_admin'),
-        status = 'active',
-        updated_at = now()
-    where email = v_email;
-    
-    raise notice 'Updated existing admin user % to super_admin role', v_email;
-  else
-    -- Create new admin user
-    insert into public.admin_users (email, password_hash, full_name, role_id, status)
-    values (
-      'tasktrust00@gmail.com',
-      public.admin_hash_password('Admin@2024!ChangeMe'),
-      'Task Trust Admin',
-      (select id from public.admin_roles where name = 'super_admin'),
-      'active'
-    )
-    returning id into v_admin_id;
-    
-    raise notice 'Created new admin user % with super_admin role', v_email;
-  end if;
-
-  -- Log the action
-  insert into public.audit_logs (admin_id, admin_email, action, entity_type, entity_id, old_value, new_value)
-  values (
-    (select id from public.admin_users where email = v_email),
-    v_email,
-    'CREATE',
-    'admin_user',
-    (select id from public.admin_users where email = v_email)::text,
-    null,
-    jsonb_build_object('email', v_email, 'role', 'super_admin', 'action', 'promoted_to_super_admin')
-  );
-
-  raise notice 'Successfully promoted % to super_admin', v_email;
-end $$;
--- Migration 024: Promote existing user tasktrust00@gmail.com to super_admin
--- Uses the user's existing password hash from auth.users (their client account)
-
-do $$
-declare
-  v_user_id uuid;
-  v_role_id uuid;
-  v_admin_id uuid;
-  v_email text := 'tasktrust00@gmail.com';
-begin
-  -- Get the user ID from profiles table (they already have an account)
-  select id into v_user_id
-  from public.profiles
-  where email = v_email;
-
-  if v_user_id is null then
-    raise exception 'User with email % not found in profiles table', v_email;
-  end if;
-
-  -- Get the super_admin role ID
-  select id into v_role_id
-  from public.admin_roles
-  where name = 'super_admin';
-
-  if v_role_id is null then
-    raise exception 'super_admin role not found in admin_roles table';
-  end if;
-
-  -- Check if admin user already exists (by email in admin_users)
-  select id into v_admin_id
-  from public.admin_users
-  where email = v_email;
-
-  if v_admin_id is not null then
-    -- Update existing admin user to super_admin role
-    update public.admin_users
-    set role_id = (select id from public.admin_roles where name = 'super_admin'),
-        status = 'active',
-        updated_at = now()
-    where email = v_email;
-    
-    raise notice 'Updated existing admin user % to super_admin role', v_email;
-  else
-    -- Create new admin user using the existing password hash from auth.users
-    -- The password hash will be copied from their client account (auth.users)
-    insert into public.admin_users (email, password_hash, full_name, role_id, status)
-    values (
-      'tasktrust00@gmail.com',
-      -- Use the existing password hash from auth.users (their client account)
-      (select encrypted_password from auth.users where email = 'tasktrust00@gmail.com'),
-      'Task Trust Admin',
-      (select id from public.admin_roles where name = 'super_admin'),
-      'active'
-    )
-    returning id into v_admin_id;
-    
-    raise notice 'Created new admin user with super_admin role', v_email;
-  end if;
-
-  -- Log the action in audit_logs
-  insert into public.audit_logs (admin_id, admin_email, action, entity_type, entity_id, old_value, new_value)
-  values (
-    (select id from public.admin_users where email = 'tasktrust00@gmail.com'),
-    'tasktrust00@gmail.com',
-    'CREATE',
-    'admin_user',
-    (select id from public.admin_users where email = 'tasktrust00@gmail.com')::text,
-    null,
-    jsonb_build_object('email', 'tasktrust00@gmail.com', 'role', 'super_admin', 'action', 'promoted_to_super_admin')
-  );
-
-  raise notice 'Successfully promoted tasktrust00@gmail.com to super_admin';
-end $$;
--- Migration 024: Promote existing user tasktrust00@gmail.com to super_admin
--- Uses the user's existing password hash from auth.users (their client account)
-
-do $$
-declare
-  v_user_id uuid;
-  v_role_id uuid;
-  v_admin_id uuid;
-  v_email text := 'tasktrust00@gmail.com';
-begin
-  -- Get the user ID from profiles table (they already have an account)
-  select id into v_user_id
-  from public.profiles
-  where email = v_email;
-
-  if v_user_id is null then
-    raise exception 'User with email % not found in profiles table', v_email;
-  end if;
-
-  -- Get the super_admin role ID
-  select id into v_role_id
-  from public.admin_roles
-  where name = 'super_admin';
-
-  if v_role_id is null then
-    raise exception 'super_admin role not found in admin_roles table';
-  end if;
-
-  -- Check if admin user already exists (by email in admin_users)
-  select id into v_admin_id
-  from public.admin_users
-  where email = v_email;
-
-  if v_admin_id is not null then
-    -- Update existing admin user to super_admin role
-    update public.admin_users
-    set role_id = (select id from public.admin_roles where name = 'super_admin'),
-        status = 'active',
-        updated_at = now()
-    where email = v_email;
-    
-    raise notice 'Updated existing admin user % to super_admin role', v_email;
-  else
-    -- Create new admin user using the existing password hash from auth.users
-    -- The password hash will be copied from their client account (auth.users)
-    insert into public.admin_users (email, password_hash, full_name, role_id, status)
-    values (
-      'tasktrust00@gmail.com',
-      -- Use the existing password hash from auth.users (their client account)
-      (select encrypted_password from auth.users where email = 'tasktrust00@gmail.com'),
-      'Task Trust Admin',
-      (select id from public.admin_roles where name = 'super_admin'),
-      'active'
-    )
-    returning id into v_admin_id;
-    
-    raise notice 'Created new admin user with super_admin role', v_email;
-  end if;
-
-  -- Log the action in audit_logs
-  insert into public.audit_logs (admin_id, admin_email, action, resource, resource_id, previous_value, new_value)
-  values (
-    (select id from public.admin_users where email = 'tasktrust00@gmail.com'),
-    'tasktrust00@gmail.com',
-    'CREATE',
-    'admin_user',
-    (select id from public.admin_users where email = 'tasktrust00@gmail.com')::text,
-    null,
-    jsonb_build_object('email', 'tasktrust00@gmail.com', 'role', 'super_admin', 'action', 'promoted_to_super_admin')
-  );
-
-  raise notice 'Successfully promoted tasktrust00@gmail.com to super_admin';
-end $$;
--- Migration 025: Fix admin user password for tasktrust00@gmail.com
--- The admin login uses PostgreSQL's crypt() function which requires a specific hash format.
--- Supabase Auth uses a different password hashing format, so we need to set a proper hash.
-
-do $$
-declare
-  v_email text := 'tasktrust00@gmail.com';
-  v_admin_id uuid;
-  v_role_id uuid;
-  v_user_id uuid;
-begin
-  -- Get the user ID from profiles table
-  select id into v_user_id
-  from public.profiles
-  where email = 'tasktrust00@gmail.com';
-
-  if v_user_id is null then
-    raise notice 'User with email tasktrust00@gmail.com not found in profiles table';
-    return;
-  end if;
-
-  -- Get the super_admin role ID
-  select id into v_role_id
-  from public.admin_roles
-  where name = 'super_admin';
-
-  if v_role_id is null then
-    raise exception 'super_admin role not found in admin_roles table';
-  end if;
-
-  -- Check if admin user already exists
-  select id into v_admin_id
-  from public.admin_users
-  where email = 'tasktrust00@gmail.com';
-
-  if v_admin_id is not null then
-    -- Update existing admin user to super_admin role with a known password hash
-    -- Set a known password: "Admin@2024!SecurePass"
-    -- The hash is generated using admin_hash_password function (PostgreSQL crypt with bcrypt)
-    update public.admin_users
-    set 
-      role_id = (select id from public.admin_roles where name = 'super_admin'),
-      status = 'active',
-      password_hash = public.admin_hash_password('Admin@2024!SecurePass'),
-      updated_at = now()
-    where email = 'tasktrust00@gmail.com';
-    
-    raise notice 'Updated existing admin user to super_admin with known password';
-  else
-    -- Create new admin user with a known password
-    insert into public.admin_users (email, password_hash, full_name, role_id, status)
-    values (
-      'tasktrust00@gmail.com',
-      public.admin_hash_password('Admin@2024!SecurePass'),
-      'Task Trust Admin',
-      (select id from public.admin_roles where name = 'super_admin'),
-      'active'
-    )
-    returning id into v_admin_id;
-    
-    raise notice 'Created new admin user with super_admin role';
-  end if;
-
-  -- Log the action
-  insert into public.audit_logs (admin_id, admin_email, action, resource, resource_id, previous_value, new_value)
-  values (
-    (select id from public.admin_users where email = 'tasktrust00@gmail.com'),
-    'tasktrust00@gmail.com',
-    'UPDATE',
-    'admin_user',
-    (select id from public.admin_users where email = 'tasktrust00@gmail.com')::text,
-    null,
-    jsonb_build_object('email', 'tasktrust00@gmail.com', 'role', 'super_admin', 'action', 'password_reset_for_login')
-  );
-
-  raise notice 'Successfully configured admin user tasktrust00@gmail.com with known password';
-end $$;
