@@ -494,7 +494,6 @@ grant execute on function public.admin_reject_transfer(text, text, uuid, text) t
 create or replace function public.admin_hold_transfer(
   p_transfer_type text,
   p_transfer_id   uuid,
-  p_admin_id      uuid,
   p_reason        text default null
 )
 returns jsonb
@@ -507,6 +506,7 @@ declare
   v_old jsonb;
   v_user_id uuid;
   v_ref text;
+  v_admin public.admin_users;
 begin
   if p_transfer_type not in ('international_transfer', 'local_transfer', 'crypto_withdrawal') then
     raise exception 'INVALID_TYPE';
@@ -529,6 +529,8 @@ begin
     raise exception 'TRANSFER_CANNOT_BE_HELD';
   end if;
 
+  v_admin := public.admin_from_token(p_token);
+
   if p_transfer_type = 'international_transfer' then
     update public.international_transfers set status = 'on_hold', updated_at = now() where id = p_transfer_id;
   elsif p_transfer_type = 'local_transfer' then
@@ -546,4 +548,4 @@ begin
 end;
 $$;
 
-grant execute on function public.admin_hold_transfer(text, text, uuid, text) to anon, authenticated;
+grant execute on function public.admin_hold_transfer(text, uuid, text) to anon, authenticated;

@@ -2,8 +2,8 @@
 // Replace these values with your Supabase project credentials.
 // ONLY the public anon key belongs here. Never expose the service_role key.
 const APP_CONFIG = {
-  supabaseUrl: 'https://cwllnfkglgbiphyymuan.supabase.co',
-  supabaseAnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3bGxuZmtnbGdiaXBoeXltdWFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NTYzMDYsImV4cCI6MjEwMzQzMjMwNn0.zbcjoz_HFp-hvTMVxLmUULZ5Jgkp9ERo4YrALQqXGt4',
+  supabaseUrl: 'https://vefynvjddevizlbqiekd.supabase.co',
+  supabaseAnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZlZnludmpkZGV2aXpsYnFpZWtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE4MTAzODYsImV4cCI6MjEwNzM4NjM4Nn0.yD_HhDcyVfYhLfQrCvMPx6MtQNBA5kzUTBrtmnsr4e0',
   bankName: 'Sagroeurope',
   primaryCurrency: 'EUR',
   secondaryCurrency: 'USD',
