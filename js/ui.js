@@ -295,7 +295,6 @@
     hide() {
       if (!this.shown) return;
       this.shown = false;
-      this._stopCycle();
       const minWait = Math.max(0, 400 - (Date.now() - this._shownAt));
       this._hideTimer = setTimeout(() => {
         const el = this.el;
