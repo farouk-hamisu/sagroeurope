@@ -227,48 +227,164 @@ const bank = document.getElementById('r-bank').value.trim() || 'Sagroeurope';
 
   document.getElementById('step3-back').addEventListener('click', function () { showStep(2); });
 
+  // Generate standalone receipt image (off-screen rendering)
+  function generateReceiptImage(receipt) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        // Create a clean, isolated receipt container
+        const container = document.createElement('div');
+        container.className = 'receipt-card';
+        container.style.cssText = `
+          position: fixed;
+          left: -9999px;
+          top: -9999px;
+          width: 360px;
+          background: #fff;
+          border-radius: 16px;
+          box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+          border: 1px solid #e3e8f0;
+          font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          overflow: hidden;
+        `;
+
+        // Build receipt HTML
+        const primarySymbol = receipt.currency === 'EUR' ? '€' : receipt.currency === 'USD' ? '$' : receipt.currency;
+        const secondarySymbol = receipt.currency === 'EUR' ? '$' : '€';
+        const eurToUsd = 1.08;
+        const usdAmount = receipt.amount * (receipt.currency === 'EUR' ? eurToUsd : 1/eurToUsd);
+
+        container.innerHTML = `
+          <div class="receipt-header" style="display:flex;align-items:center;justify-content:space-between;padding:16px 16px 12px;background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);color:#fff;">
+            <div class="receipt-brand" style="display:flex;align-items:center;gap:10px;">
+              <div class="receipt-logo" style="width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,0.15);padding:6px;display:flex;align-items:center;justify-content:center;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;stroke:#fff;"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+              </div>
+              <div>
+                <strong style="font-size:15px;color:#fff;">Sagroeurope</strong>
+                <span style="font-size:11px;color:rgba(255,255,255,0.8);">Agricultural Banking & Financial Services</span>
+              </div>
+            </div>
+            <div class="receipt-status completed" style="display:flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(255,255,255,0.15);color:#fff;border-radius:999px;font-size:12px;font-weight:700;backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.2);">
+              <strong>Completed</strong>
+            </div>
+          </div>
+
+          <div class="receipt-meta" style="padding:14px 16px;background:var(--surface);">
+            <div class="meta-row" style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+              <span class="meta-label" style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.03em;">Ref</span>
+              <span class="meta-value" style="font-size:13px;color:var(--text);font-weight:500;text-align:right;word-break:break-word;">${UI.escapeHtml(receipt.reference)}</span>
+            </div>
+            <div class="meta-row" style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+              <span class="meta-label" style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.03em;">Date & Time</span>
+              <span class="meta-value" style="font-size:13px;color:var(--text);font-weight:500;text-align:right;word-break:break-word;">${UI.formatDateTime(receipt.date)}</span>
+            </div>
+            <div class="meta-row" style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;">
+              <span class="meta-label" style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.03em;">Status</span>
+              <span class="meta-value" style="font-size:13px;color:var(--text);font-weight:500;text-align:right;word-break:break-word;"><span class="badge badge-completed" style="background:var(--success-soft);color:var(--success);display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:10px;font-weight:600;line-height:1.5;white-space:nowrap;">Completed</span></span>
+            </div>
+          </div>
+
+          <div style="height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:0 16px;"></div>
+
+          <div class="receipt-party-section" style="display:grid;grid-template-columns:1fr 1fr;gap:0;padding:16px;background:var(--surface-2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+            <div class="party-card from" style="padding:12px 8px;">
+              <div class="party-header" style="margin-bottom:8px;">
+                <span class="party-tag" style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;">From</span>
+              </div>
+              <div class="party-details">
+                <div class="party-name" style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">${UI.escapeHtml(receipt.from)}</div>
+                <div class="party-account" style="font-size:11px;font-weight:600;color:var(--text);font-family:ui-monospace,monospace;">${UI.escapeHtml(receipt.fromAccount || receipt.account)}</div>
+              </div>
+            </div>
+            <div class="party-divider" style="width:1px;background:var(--border);margin:0 12px;align-self:stretch;"></div>
+            <div class="party-card to" style="padding:12px 8px;">
+              <div class="party-header" style="margin-bottom:8px;">
+                <span class="party-tag" style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;">To</span>
+              </div>
+              <div class="party-details">
+                <div class="party-name" style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">${UI.escapeHtml(receipt.to)}</div>
+                <div class="party-bank" style="font-size:11px;color:var(--muted);margin-bottom:2px;">${UI.escapeHtml(receipt.bank)}</div>
+                <div class="party-account" style="font-size:11px;font-weight:600;color:var(--text);font-family:ui-monospace,monospace;">${UI.escapeHtml(receipt.account)}</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:0 16px;"></div>
+
+          <div class="receipt-amount-card" style="padding:16px;background:linear-gradient(135deg,var(--primary-soft) 0%,var(--surface) 100%);border-top:1px solid var(--border);">
+            <div class="amount-row" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+              <div class="amount-col" style="padding:12px;background:var(--surface);border-radius:10px;border:1px solid var(--border);text-align:center;">
+                <span class="amount-label" style="display:block;font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Amount</span>
+                <div class="amount-value" style="font-size:16px;font-weight:800;color:var(--text);letter-spacing:-0.01em;">${primarySymbol}${receipt.amount.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
+              </div>
+              <div class="amount-col" style="padding:12px;background:var(--surface);border-radius:10px;border:1px solid var(--border);text-align:center;">
+                <span class="amount-label" style="display:block;font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Fee</span>
+                <div class="amount-value fee" style="font-size:16px;font-weight:800;color:var(--danger);letter-spacing:-0.01em;">${primarySymbol}${receipt.fee.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
+              </div>
+              <div class="amount-col total" style="padding:12px;background:linear-gradient(135deg,var(--primary-soft) 0%,var(--primary) 100%);border-color:var(--primary);border-radius:10px;border:1px solid var(--primary);text-align:center;">
+                <span class="amount-label" style="display:block;font-size:10px;color:rgba(255,255,255,0.7);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Total</span>
+                <div class="amount-value" style="font-size:20px;font-weight:800;color:#fff;letter-spacing:-0.01em;">${primarySymbol}${(receipt.amount + receipt.fee).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:0 16px;"></div>
+
+          <div class="receipt-meta" style="padding:14px 16px;background:var(--surface);">
+            <div class="meta-row" style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;">
+              <span class="meta-label" style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.03em;">Description</span>
+              <span class="meta-value" style="font-size:13px;color:var(--text);font-weight:500;text-align:right;word-break:break-word;">${UI.escapeHtml(receipt.desc)}</span>
+            </div>
+          </div>
+
+          <div style="padding:16px;background:var(--surface);border-top:1px solid var(--border);">
+            <p style="font-size:10px;color:var(--muted);margin-bottom:16px;line-height:1.5;text-align:center;">This receipt confirms the transfer was completed. Funds debited from your account.</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
+              <button class="btn btn-primary" style="flex:1;min-width:120px;padding:10px 16px;border-radius:10px;font-weight:600;font-size:13px;border:none;cursor:pointer;background:var(--primary);color:#fff;" onclick="window.closeReceiptShare && window.closeReceiptShare()">Close</button>
+            </div>
+          </div>
+        `;
+
+        // Add to body and render
+        document.body.appendChild(container);
+
+        // Wait for layout
+        await new Promise(r => requestAnimationFrame(r));
+
+        // Capture with html2canvas
+        const canvas = await html2canvas(container, {
+          scale: 3,
+          useCORS: true,
+          logging: false,
+          backgroundColor: '#ffffff',
+          width: container.scrollWidth,
+          height: container.scrollHeight,
+          windowWidth: container.scrollWidth,
+          windowHeight: container.scrollHeight,
+        });
+
+        // Clean up
+        document.body.removeChild(container);
+
+        // Convert to blob
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png', 0.95));
+        resolve(blob);
+      } catch (e) {
+        reject(e);
+      }
+    });
+  }
+
   // Share receipt as image
   window.shareReceipt = async function () {
     const receipt = window.currentReceipt;
     if (!receipt) return;
 
-    const receiptCard = document.querySelector('.receipt-card');
-    if (!receiptCard) {
-      UI.toast('Receipt not found', 'warning');
-      return;
-    }
-
     try {
       UI.toast('Generating receipt image...', 'info');
 
-      // Hide the share button during capture
-      const shareBtn = document.getElementById('share-receipt-btn');
-      if (shareBtn) shareBtn.style.display = 'none';
-
-      // Capture the receipt card as canvas
-      const canvas = await html2canvas(receiptCard, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff',
-        width: receiptCard.scrollWidth,
-        height: receiptCard.scrollHeight,
-        windowWidth: receiptCard.scrollWidth,
-        windowHeight: receiptCard.scrollHeight,
-        onclone: function(clonedDoc) {
-          // Hide actions in the cloned version
-          const clonedActions = clonedDoc.querySelector('.receipt-actions');
-          if (clonedActions) clonedActions.style.display = 'none';
-          const clonedShareBtn = clonedDoc.getElementById('share-receipt-btn');
-          if (clonedShareBtn) clonedShareBtn.style.display = 'none';
-        }
-      });
-
-      // Show the share button again
-      if (shareBtn) shareBtn.style.display = '';
-
-      // Convert to blob
-      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png', 0.95));
+      // Generate standalone receipt image
+      const blob = await generateReceiptImage(receipt);
 
       // Prepare file for sharing
       const file = new File([blob], `receipt-${receipt.reference}.png`, { type: 'image/png' });
