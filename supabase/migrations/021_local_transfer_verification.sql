@@ -492,6 +492,8 @@ grant execute on function public.admin_reject_transfer(text, text, uuid, text) t
 
 -- Admin function to put a transfer on hold
 create or replace function public.admin_hold_transfer(
+  p_token         text,
+
   p_transfer_type text,
   p_transfer_id   uuid,
   p_reason        text default null
