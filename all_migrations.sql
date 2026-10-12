@@ -6630,7 +6630,6 @@ grant execute on function public.admin_reject_transfer(text, text, uuid, text) t
 create or replace function public.admin_hold_transfer(
   p_transfer_type text,
   p_transfer_id   uuid,
-  p_admin_id      uuid,
   p_reason        text default null
 )
 returns jsonb
