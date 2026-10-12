@@ -339,9 +339,6 @@ const bank = document.getElementById('r-bank').value.trim() || 'Sagroeurope';
 
           <div style="padding:16px;background:#fff;border-top:1px solid #e3e8f0;">
             <p style="font-size:10px;color:#7c8aa0;margin-bottom:16px;line-height:1.5;text-align:center;">This receipt confirms the transfer was completed. Funds debited from your account.</p>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
-              <button class="btn btn-primary" style="flex:1;min-width:120px;padding:10px 16px;border-radius:10px;font-weight:600;font-size:13px;border:none;cursor:pointer;background:#1a7f3d;color:#fff;" onclick="window.closeReceiptShare && window.closeReceiptShare()">Close</button>
-            </div>
           </div>
         `;
 

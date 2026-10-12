@@ -875,8 +875,6 @@
   .party-card:first-child { border-right: none; border-bottom: 1px solid var(--border); }
   .party-divider { display: none; }
   .amount-row { grid-template-columns: 1fr; }
-  .receipt-actions { flex-direction: column; }
-  .receipt-actions .btn { width: 100%; }
   .receipt-header { flex-direction: column; gap: 16px; text-align: center; }
 }
 
