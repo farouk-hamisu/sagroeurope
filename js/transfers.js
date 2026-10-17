@@ -55,7 +55,7 @@
       if (profile.outgoing_transfers_enabled === false) {
         banner.classList.remove('hide');
         document.getElementById('outgoing-banner-reason').textContent =
-          (profile.outgoing_transfers_disabled_reason ? 'Reason: ' + profile.outgoing_transfers_disabled_reason : 'Please contact support for details.');
+          (profile.outgoing_transfers_disabled_reason ? 'Reason: ' + profile.outgoing_transfers_disabled_reason : 'Transaction failed. Please check your network and try again. If this continues, contact support.');
       } else {
         banner.classList.add('hide');
       }

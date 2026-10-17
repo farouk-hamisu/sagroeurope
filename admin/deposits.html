@@ -24,12 +24,14 @@
     </div>
   </div>
   <div id="page-root">
-    <div class="card">
+    <div class="card mb-3">
       <div class="filter-bar">
-        <div class="grow"><input type="search" class="input" id="f-search" placeholder="Search reference, user..."></div>
+        <div class="grow"><input type="search" class="input" id="f-search" placeholder="Search reference, user, asset..."></div>
         <select class="select" id="f-status"><option value="">All statuses</option></select>
+        <select class="select" id="f-type"><option value="">All types</option><option value="fiat">Fiat</option><option value="crypto">Crypto</option></select>
+        <select class="select" id="f-asset"><option value="">All assets</option></select>
       </div>
-      <div class="table-wrap"><div id="deposits-table"><div class="loading-block"><div class="spinner"></div><span>Loading deposits...</span></div></div></div>
+      <div class="table-wrap"><div id="deposit-table"><div class="loading-block"><div class="spinner"></div><span>Loading deposits...</span></div></div></div>
       <div class="pagination" id="pagination"></div>
     </div>
   </div>

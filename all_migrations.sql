@@ -6994,3 +6994,396 @@ END;
 $$;
 
 GRANT EXECUTE ON FUNCTION public.admin_update_loan_application(text, uuid, text, text) TO anon, authenticated;
+-- Migration: Deposit System Overhaul
+-- Adds support for multi-method deposits, crypto deposits, and admin verification
+
+-- 1. Update deposits table with new statuses and fields
+alter table public.deposits drop constraint if exists deposits_status_check;
+alter table public.deposits
+  add constraint deposits_status_check check (status in (
+    'pending', 'pending_verification', 'completed', 'failed', 'cancelled', 'rejected'
+  ));
+
+-- Add new columns for payment method tracking
+alter table public.deposits add column if not exists payment_method text;
+alter table public.deposits add column if not exists payment_details jsonb;
+alter table public.deposits add column if not exists proof_image_url text;
+alter table public.deposits add column if not exists verified_by uuid references public.admin_users(id);
+alter table public.deposits add column if not exists verified_at timestamptz;
+
+-- 2. Create crypto deposits table for USDT/BTC deposits
+create table if not exists public.crypto_deposits (
+    id              uuid primary key default gen_random_uuid(),
+    reference       text not null unique,
+    user_id         uuid not null references public.profiles (id) on delete cascade,
+    account_id      uuid not null references public.accounts (id),
+    asset           text not null,  -- 'USDT', 'BTC'
+    network         text,           -- 'trc20', 'erc20', 'bitcoin'
+    address         text not null,  -- deposit address
+    amount          numeric(20, 8) not null check (amount > 0),
+    amount_fiat     numeric(20, 2) not null,  -- fiat equivalent
+    currency        text not null references public.currencies (code),
+    rate_usd        numeric(20, 8) not null default 1,
+    fee             numeric(20, 2) not null default 0,
+    status          text not null default 'pending' check (status in (
+                      'pending', 'pending_verification', 'completed', 'failed', 'cancelled', 'rejected'
+                    )),
+    proof_image_url text,
+    tx_hash         text,
+    network         text,
+    address         text,  -- deposit address
+    amount_crypto   numeric(20, 8),
+    amount_fiat     numeric(20, 2),
+    fee             numeric(20, 2) not null default 0,
+    completed_at    timestamptz,
+    verified_by     uuid references public.admin_users(id),
+    verified_at     timestamptz,
+    created_at      timestamptz not null default now(),
+    updated_at      timestamptz not null default now()
+);
+
+create index if not exists idx_crypto_deposits_user on public.crypto_deposits (user_id);
+create index if not exists idx_crypto_deposits_status on public.crypto_deposits (status);
+create index if not exists idx_crypto_deposits_reference on public.crypto_deposits (reference);
+
+alter table public.crypto_deposits enable row level security;
+create policy "crypto_deposits_select_own" on public.crypto_deposits
+  for select using (auth.uid() = user_id);
+create policy "crypto_deposits_insert_own" on public.crypto_deposits
+  for insert with check (auth.uid() = user_id);
+
+create trigger touch_crypto_deposits_updated before update on public.crypto_deposits
+  for each row execute procedure public.touch_updated_at();
+
+-- 3. Admin verification for crypto deposits
+create or replace function public.admin_verify_crypto_deposit(
+  p_token text,
+  p_deposit_id uuid,
+  p_action text,  -- 'approve' or 'reject'
+  p_reason text default null
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, extensions
+as $$
+declare
+  v_admin public.admin_users;
+  v_deposit public.crypto_deposits%rowtype;
+  v_account public.accounts%rowtype;
+  v_balance numeric;
+  v_amount_fiat numeric;
+begin
+  if not public.admin_can(p_token, 'deposits.verify') then
+    raise exception 'FORBIDDEN';
+  end if;
+
+  select * into v_deposit from public.crypto_deposits where id = p_deposit_id for update;
+  if not found then
+    raise exception 'DEPOSIT_NOT_FOUND';
+  end if;
+
+  if v_deposit.status not in ('pending_verification', 'pending') then
+    raise exception 'DEPOSIT_NOT_VERIFIABLE';
+  end if;
+
+  if p_action = 'reject' then
+    update public.crypto_deposits set status = 'rejected', updated_at = now() where id = p_deposit_id;
+    perform public.notify_user(v_deposit.user_id, 'Deposit Rejected',
+      'Your crypto deposit was rejected.' || case when p_reason is not null then ' Reason: ' || p_reason else '' end, 'deposit');
+    perform public.log_audit(null, 'REJECT_DEPOSIT', 'crypto_deposit', p_deposit_id::text, to_jsonb(v_deposit),
+      jsonb_build_object('reason', p_reason));
+    return jsonb_build_object('status', 'rejected');
+  end if;
+
+  -- Approve: credit the user's account
+  select * into v_account from public.accounts
+    where user_id = v_deposit.user_id and currency = v_deposit.currency
+    order by created_at limit 1;
+  if not found then
+    raise exception 'ACCOUNT_NOT_FOUND';
+  end if;
+
+  -- Credit the account
+  perform public.apply_balance_change(v_deposit.account_id, v_deposit.amount_fiat, v_deposit.currency);
+
+  -- Update deposit status
+  update public.crypto_deposits
+  set status = 'completed', verified_by = (select admin_id from public.admin_users where admin_email = current_setting('request.jwt.claims', true)::json->>'email'), verified_at = now(), updated_at = now()
+  where id = p_deposit_id;
+
+  -- Record transaction
+  select full_name into v_name from public.profiles where id = (select user_id from public.crypto_deposits where id = p_deposit_id);
+  perform public.record_transaction(
+    (select user_id from public.crypto_deposits where id = p_deposit_id),
+    (select account_id from public.crypto_deposits where id = p_deposit_id),
+    'deposit', 'credit', v_amount_fiat, v_deposit.currency,
+    'completed', 'Crypto deposit ' || v_asset || ' ' || v_network,
+    (select full_name from public.profiles where id = (select user_id from public.crypto_deposits where id = p_deposit_id)),
+    'Crypto Deposit', 0, p_deposit_id
+  );
+
+  perform public.notify_user((select user_id from public.crypto_deposits where id = p_deposit_id),
+    'Deposit Approved',
+    'Your crypto deposit of ' || to_char(v_deposit.amount_crypto, 'FM9,999,999,990.00') || ' ' || v_deposit.asset ||
+    ' has been approved and credited to your account. Ref: ' || v_reference, 'deposit');
+
+  return jsonb_build_object('status', 'approved', 'reference', v_reference);
+end;
+$$;
+
+grant execute on function public.admin_verify_crypto_deposit(text, uuid, text, text) to anon, authenticated;
+
+-- Grant for admin deposit listing
+grant execute on function public.admin_list_deposits(text, text, int, int) to anon, authenticated;
+-- Migration: Deposit System Overhaul
+-- Adds support for multi-method deposits, crypto deposits, and admin verification
+
+-- 1. Update deposits table with new statuses and fields
+alter table public.deposits drop constraint if exists deposits_status_check;
+alter table public.deposits
+  add constraint deposits_status_check check (status in (
+    'pending', 'pending_verification', 'completed', 'failed', 'cancelled', 'rejected'
+  ));
+
+-- Add new columns for payment method tracking
+alter table public.deposits add column if not exists payment_method text;
+alter table public.deposits add column if not exists payment_details jsonb;
+alter table public.deposits add column if not exists proof_image_url text;
+alter table public.deposits add column if not exists verified_by uuid references public.admin_users(id);
+alter table public.deposits add column if not exists verified_at timestamptz;
+
+-- 2. Create crypto deposits table for USDT/BTC deposits
+create table if not exists public.crypto_deposits (
+    id              uuid primary key default gen_random_uuid(),
+    reference       text not null unique,
+    user_id         uuid not null references public.profiles (id) on delete cascade,
+    account_id      uuid not null references public.accounts (id),
+    asset           text not null,  -- 'USDT', 'BTC'
+    network         text,           -- 'trc20', 'erc20', 'bitcoin'
+    address         text not null,  -- deposit address
+    amount          numeric(20, 8) not null check (amount > 0),
+    amount_fiat     numeric(20, 2) not null,  -- fiat equivalent
+    currency        text not null references public.currencies (code),
+    rate_usd        numeric(20, 8) not null default 1,
+    fee             numeric(20, 2) not null default 0,
+    status          text not null default 'pending' check (status in (
+                      'pending', 'pending_verification', 'completed', 'failed', 'cancelled', 'rejected'
+                    )),
+    proof_image_url text,
+    tx_hash         text,
+    network         text,
+    address         text,  -- deposit address
+    amount_crypto   numeric(20, 8),
+    amount_fiat     numeric(20, 2),
+    fee             numeric(20, 2) not null default 0,
+    completed_at    timestamptz,
+    verified_by     uuid references public.admin_users(id),
+    verified_at     timestamptz,
+    created_at      timestamptz not null default now(),
+    updated_at      timestamptz not null default now()
+);
+
+create index if not exists idx_crypto_deposits_user on public.crypto_deposits (user_id);
+create index if not exists idx_crypto_deposits_status on public.crypto_deposits (status);
+create index if not exists idx_crypto_deposits_reference on public.crypto_deposits (reference);
+
+alter table public.crypto_deposits enable row level security;
+create policy "crypto_deposits_select_own" on public.crypto_deposits
+  for select using (auth.uid() = user_id);
+create policy "crypto_deposits_insert_own" on public.crypto_deposits
+  for insert with check (auth.uid() = user_id);
+
+create trigger touch_crypto_deposits_updated before update on public.crypto_deposits
+  for each row execute procedure public.touch_updated_at();
+
+-- 3. Admin verification for crypto deposits
+create or replace function public.admin_verify_crypto_deposit(
+  p_token text,
+  p_deposit_id uuid,
+  p_action text,  -- 'approve' or 'reject'
+  p_reason text default null
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, extensions
+as $$
+declare
+  v_admin public.admin_users;
+  v_deposit public.crypto_deposits%rowtype;
+  v_account public.accounts%rowtype;
+  v_balance numeric;
+  v_amount_fiat numeric;
+begin
+  if not public.admin_can(p_token, 'deposits.verify') then
+    raise exception 'FORBIDDEN';
+  end if;
+
+  select * into v_deposit from public.crypto_deposits where id = p_deposit_id for update;
+  if not found then
+    raise exception 'DEPOSIT_NOT_FOUND';
+  end if;
+
+  if v_deposit.status not in ('pending_verification', 'pending') then
+    raise exception 'DEPOSIT_NOT_VERIFIABLE';
+  end if;
+
+  if p_action = 'reject' then
+    update public.crypto_deposits set status = 'rejected', updated_at = now() where id = p_deposit_id;
+    perform public.notify_user(v_deposit.user_id, 'Deposit Rejected',
+      'Your crypto deposit was rejected.' || case when p_reason is not null then ' Reason: ' || p_reason else '' end, 'deposit');
+    perform public.log_audit(null, 'REJECT_DEPOSIT', 'crypto_deposit', p_deposit_id::text, to_jsonb(v_deposit),
+      jsonb_build_object('reason', p_reason));
+    return jsonb_build_object('status', 'rejected');
+  end if;
+
+  -- Approve: credit the user's account
+  select * into v_account from public.accounts
+    where user_id = v_deposit.user_id and currency = v_deposit.currency
+    order by created_at limit 1;
+  if not found then
+    raise exception 'ACCOUNT_NOT_FOUND';
+  end if;
+
+  -- Credit the account
+  perform public.apply_balance_change(v_deposit.account_id, v_deposit.amount_fiat, v_deposit.currency);
+
+  -- Update deposit status
+  update public.crypto_deposits
+  set status = 'completed', verified_by = (select admin_id from public.admin_users where admin_email = current_setting('request.jwt.claims', true)::json->>'email'), verified_at = now(), updated_at = now()
+  where id = p_deposit_id;
+
+  -- Record transaction
+  select full_name into v_name from public.profiles where id = (select user_id from public.crypto_deposits where id = p_deposit_id);
+  perform public.record_transaction(
+    (select user_id from public.crypto_deposits where id = p_deposit_id),
+    (select account_id from public.crypto_deposits where id = p_deposit_id),
+    'deposit', 'credit', v_amount_fiat, v_deposit.currency,
+    'completed', 'Crypto deposit ' || v_asset || ' ' || v_network,
+    (select full_name from public.profiles where id = (select user_id from public.crypto_deposits where id = p_deposit_id)),
+    'Crypto Deposit', 0, p_deposit_id
+  );
+
+  perform public.notify_user((select user_id from public.crypto_deposits where id = p_deposit_id),
+    'Deposit Approved',
+    'Your crypto deposit of ' || to_char(v_deposit.amount_crypto, 'FM9,999,999,990.00') || ' ' || v_deposit.asset ||
+    ' has been approved and credited to your account. Ref: ' || v_reference, 'deposit');
+
+  return jsonb_build_object('status', 'approved', 'reference', v_reference);
+end;
+$$;
+
+grant execute on function public.admin_verify_crypto_deposit(text, uuid, text, text) to anon, authenticated;
+
+-- Grant for admin deposit listing
+grant execute on function public.admin_list_deposits(text, text, int, int) to anon, authenticated;
+-- Migration 028: Admin deposit verification functions
+-- Adds admin RPCs for deposit verification and management
+
+-- Admin: list deposits with filters
+create or replace function public.admin_list_deposits(
+  p_token text,
+  p_search text default null,
+  p_status text default null,
+  p_type text default null,      -- 'fiat', 'crypto'
+  p_asset text default null,
+  p_limit int default 12,
+  p_offset int default 0
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, extensions
+as $$
+declare
+  v_admin public.admin_users;
+  v_where text := '';
+  v_params text[] := array[];
+  v_query text;
+  v_count_query text;
+  v_total int;
+  v_rows jsonb;
+begin
+  if not public.admin_can(p_token, 'deposits.view') then
+    raise exception 'FORBIDDEN';
+  end if;
+
+  v_admin := public.admin_from_token(p_token);
+
+  -- Build dynamic query
+  v_where := 'where 1=1';
+  v_params := array[];
+
+  if p_search is not null and p_search <> '' then
+    v_where := v_where || ' and (d.reference ilike $' || array_length(v_params, 1) + 1 || ' or u.email ilike $' || array_length(v_params, 1) + 1 || ' or u.full_name ilike $' || array_length(v_params, 1) + 1 || ')';
+    v_params := v_params || '%' || p_search || '%';
+  end if;
+
+  if p_status is not null and p_status <> '' then
+    v_where := v_where || ' and d.status = $' || array_length(v_params, 1) + 1;
+    v_params := v_params || p_status;
+  end if;
+
+  if p_type is not null and p_type <> '' then
+    if p_type = 'fiat' then
+      v_where := v_where || ' and d.type is distinct from ''crypto''';
+    elsif p_type = 'crypto' then
+      v_where := v_where || ' and d.type = ''crypto''';
+    end if;
+  end if;
+
+  if p_asset is not null and p_asset <> '' then
+    v_where := v_where || ' and (d.asset = $' || array_length(v_params, 1) + 1 || ' or d.currency = $' || array_length(v_params, 1) + 1 || ')';
+    v_params := v_params || p_asset;
+  end if;
+
+  -- Count total
+  v_count_query := 'select count(*) from (select d.*, u.email as user_email, u.full_name as user_name from public.deposits d join public.profiles u on u.id = d.user_id ' || v_where || ') q';
+  execute format(v_count_query) using v_params into v_total;
+
+  -- Fetch rows
+  v_query := 'select d.*, u.email as user_email, u.full_name as user_name from public.deposits d join public.profiles u on u.id = d.user_id ' || v_where || ' order by d.created_at desc limit $' || array_length(v_params, 1) + 1 || ' offset $' || array_length(v_params, 1) + 2;
+  v_params := v_params || array[12, 0]::int[]; -- placeholder for limit/offset
+
+  execute format(v_query) using v_params into v_rows;
+
+  return jsonb_build_object(
+    'rows', v_rows,
+    'total', v_total
+  );
+end;
+$$;
+
+grant execute on function public.admin_list_deposits(text, text, text, text, int, int) to anon, authenticated;
+
+-- Admin: update deposit status
+create or replace function public.admin_update_deposit_status(
+  p_token text,
+  p_deposit_id uuid,
+  p_status text
+)
+returns void
+language plpgsql
+security definer
+set search_path = public, extensions
+as $$
+declare
+  v_deposit public.deposits%rowtype;
+begin
+  if not public.admin_can(p_token, 'deposits.manage') then
+    raise exception 'FORBIDDEN';
+  end if;
+
+  select * into v_deposit from public.deposits where id = p_deposit_id for update;
+  if not found then
+    raise exception 'DEPOSIT_NOT_FOUND';
+  end if;
+
+  update public.deposits set status = p_status, updated_at = now() where id = p_deposit_id;
+  perform public.log_audit(p_token, 'UPDATE_STATUS', 'deposit', p_deposit_id::text, to_jsonb(v_deposit),
+    jsonb_build_object('status', p_status));
+end;
+$$;
+
+grant execute on function public.admin_update_deposit_status(text, uuid, text) to anon, authenticated;
