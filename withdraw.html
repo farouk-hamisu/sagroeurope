@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Withdraw Funds — Sagroeurope</title>
+  <link rel="icon" type="image/svg+xml" href="assets/logos/favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+<div class="page-loader" id="page-loader" role="status" aria-live="polite">
+    <div class="pl-inner">
+      <div class="pl-orbit">
+        <span class="pl-ring"></span>
+        <span class="pl-ring pl-ring--2"></span>
+        <span class="pl-ring pl-ring--3"></span>
+        <span class="pl-core"></span>
+      </div>
+      <div class="pl-track"><span class="pl-progress"></span></div>
+      <p class="pl-status" id="pl-status">Loading</p>
+    </div>
+  </div>
+  <div id="page-root">
+    <div class="dash-layout">
+      <!-- Header -->
+      <div class="dash-header">
+        <div class="dash-header-left">
+          <div id="dash-avatar" class="dash-avatar"></div>
+          <div class="dash-greeting">
+            <p id="dash-user-name" class="dash-user-name"></p>
+            <h1 id="dash-greeting-text" class="dash-greeting-text"></h1>
+          </div>
+        </div>
+        <div class="dash-header-right">
+          <a href="notifications.html" class="dash-notif-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Withdrawal Flow -->
+      <div id="withdraw-flow" class="withdraw-flow">
+        <!-- Step 1: Select Method -->
+        <div id="withdraw-step-1" class="withdraw-step active">
+          <div class="withdraw-step-header">
+            <div class="step-indicator">
+              <span class="step-number active">1</span>
+              <span class="step-title active">Select Method</span>
+              <span class="step-separator"></span>
+              <span class="step-number">2</span>
+              <span class="step-title">Details</span>
+              <span class="step-separator"></span>
+              <span class="step-number">3</span>
+              <span class="step-title">Confirm</span>
+            </div>
+          </div>
+          <div class="withdraw-form">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">How would you like to withdraw?</h3>
+                <p class="card-subtitle">Choose your preferred withdrawal method</p>
+              </div>
+              <div class="card-body">
+                <div class="withdrawal-methods-grid" id="withdrawal-methods-grid">
+                  <!-- Methods will be rendered here -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2: Enter Details -->
+          <div id="withdraw-step-2" class="withdraw-step hide">
+            <div class="withdraw-step-header">
+              <div class="step-indicator">
+                <span class="step-number done">1</span>
+                <span class="step-title done">Method</span>
+                <span class="step-separator"></span>
+                <span class="step-number active">2</span>
+                <span class="step-title active">Details</span>
+                <span class="step-separator"></span>
+                <span class="step-number">3</span>
+                <span class="step-title">Confirm</span>
+              </div>
+            </div>
+            <div id="withdraw-form-container" class="withdraw-form-container">
+              <!-- Dynamic form will be rendered here -->
+            </div>
+          </div>
+
+          <!-- Step 3: Review & Confirm -->
+          <div id="withdraw-step-3" class="withdraw-step hide">
+            <div class="withdraw-step-header">
+              <div class="step-indicator">
+                <span class="step-number done">1</span>
+                <span class="step-title done">Method</span>
+                <span class="step-separator"></span>
+                <span class="step-number done">2</span>
+                <span class="step-title done">Details</span>
+                <span class="step-separator"></span>
+                <span class="step-number active">3</span>
+                <span class="step-title active">Confirm</span>
+              </div>
+            </div>
+            <div id="withdraw-review" class="withdraw-review">
+              <!-- Review content will be rendered here -->
+            </div>
+          </div>
+
+          <!-- Step 4: OTP Verification (conditional) -->
+          <div id="withdraw-step-otp" class="withdraw-step hide">
+            <div class="withdraw-step-header">
+              <div class="step-indicator">
+                <span class="step-number done">1</span>
+                <span class="step-title done">Method</span>
+                <span class="step-separator"></span>
+                <span class="step-number done">2</span>
+                <span class="step-title done">Details</span>
+                <span class="step-separator"></span>
+                <span class="step-number done">3</span>
+                <span class="step-title done">Confirm</span>
+                <span class="step-separator"></span>
+                <span class="step-number active">4</span>
+                <span class="step-title active">OTP</span>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Verify Your Identity</h3>
+                <p class="card-subtitle">Enter the 6-digit code sent to your registered email/phone</p>
+              </div>
+              <div class="card-body">
+                <div class="otp-input-container">
+                  <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code" data-index="0" autocomplete="one-time-code">
+                  <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+                  <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+                  <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+                  <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+                  <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+                </div>
+                <div class="form-error" id="otp-error"></div>
+                <p class="text-sm text-muted mt-3">Enter the 6-digit code sent to your registered email/phone. Code expires in 10 minutes.</p>
+              </div>
+              <div class="flex-between mt-4">
+                <button class="btn btn-outline" id="otp-back">Back</button>
+                <button class="btn btn-primary" id="otp-submit">Verify & Submit</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 5: Confirmation/Receipt -->
+          <div id="withdraw-step-success" class="withdraw-step hide">
+            <div class="withdraw-step-header">
+              <div class="step-indicator">
+                <span class="step-number done">1</span>
+                <span class="step-title done">Method</span>
+                <span class="step-separator"></span>
+                <span class="step-number done">2</span>
+                <span class="step-title done">Details</span>
+                <span class="step-separator"></span>
+                <span class="step-number done">3</span>
+                <span class="step-title done">Confirm</span>
+              </div>
+            </div>
+            <div class="withdraw-success" id="withdraw-success">
+              <div class="success-icon">✓</div>
+              <h3 class="card-title">Withdrawal Submitted</h3>
+              <p class="text-muted">Your withdrawal request has been submitted successfully.</p>
+              <div class="receipt-card" id="withdraw-receipt">
+                <!-- Receipt will be rendered here -->
+              </div>
+              <div class="flex gap-2 mt-4 justify-center">
+                <a href="withdraw.html" class="btn btn-outline">Make Another Withdrawal</a>
+                <a href="transactions.html" class="btn btn-primary">View Transaction</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/icons.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/navigation.js"></script>
+  <script src="js/withdraw.js"></script>
+</body>
+</html>

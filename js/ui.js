@@ -490,7 +490,8 @@
   // ---------- Badges ----------
   function badge(status) {
     const map = {
-      pending: 'badge-pending', processing: 'badge-processing', completed: 'badge-completed',
+      pending: 'badge-pending', processing: 'badge-processing', pending_verification: 'badge-pending',
+      completed: 'badge-completed',
       active: 'badge-active', failed: 'badge-failed', cancelled: 'badge-cancelled',
       reversed: 'badge-reversed', rejected: 'badge-rejected', frozen: 'badge-frozen',
       blocked: 'badge-blocked', expired: 'badge-expired', under_review: 'badge-under_review',
@@ -502,7 +503,7 @@
       awaiting_admin_verification: 'badge-completed'
     };
     const cls = map[status] || 'badge-neutral';
-    const labels = { awaiting_admin_verification: 'Completed', on_hold: 'On Hold' };
+    const labels = { awaiting_admin_verification: 'Completed', on_hold: 'On Hold', pending_verification: 'Pending Verification' };
     const label = labels[status] || String(status || '').replace(/_/g, ' ');
     return '<span class="badge ' + cls + '">' + escapeHtml(label) + '</span>';
   }
@@ -576,6 +577,45 @@
     }
     if (typeof err === 'string') return friendlyError(err);
     return 'An unexpected error occurred. Please try again.';
+  }
+
+  // ---------- Account restriction checks ----------
+  // Reads the live profile/account state so an admin change is reflected
+  // immediately instead of relying on a cached profile. Returns an empty
+  // string when the account has no active restriction.
+  async function transferRestriction(userId, accountId) {
+    try {
+      const queries = [
+        SB.from('profiles')
+          .select('status, outgoing_transfers_enabled, outgoing_transfers_disabled_reason')
+          .eq('id', userId)
+          .maybeSingle()
+      ];
+      if (accountId) {
+        queries.push(SB.from('accounts').select('status').eq('id', accountId).maybeSingle());
+      }
+      const results = await Promise.all(queries);
+      const profile = results[0] && results[0].data;
+      const account = results[1] && results[1].data;
+      const messages = [];
+
+      if (profile && (profile.status === 'suspended' || profile.status === 'closed')) {
+        messages.push('Your account is ' + profile.status + '. Please contact support to restore access.');
+      }
+      if (account && (account.status === 'suspended' || account.status === 'inactive' || account.status === 'closed')) {
+        messages.push('The selected account is ' + account.status + ' and cannot be used for this transaction.');
+      }
+      if (profile && profile.outgoing_transfers_enabled === false) {
+        messages.push(profile.outgoing_transfers_disabled_reason
+          ? 'Outgoing transfers are disabled for your account. Reason: ' + profile.outgoing_transfers_disabled_reason + '.'
+          : 'Outgoing transfers are disabled for your account. Please contact support for details.');
+      }
+      return messages.join(' ');
+    } catch (e) {
+      // If the check cannot be completed, let the SECURITY DEFINER RPC make
+      // the final decision instead of showing a false restriction message.
+      return '';
+    }
   }
 
   // ---------- RPC helper with proper error handling ----------
@@ -660,6 +700,7 @@
     toast, openModal, closeModal, confirmDialog, loading,
     money, formatDate, formatDateTime, timeAgo, initial, avatar,
     badge, typeLabel, escapeHtml, emptyState, friendlyError, apiErrorMessage,
+    transferRestriction,
     rpc, qs, copyText, formatNumber: money,
     cardDigits, renderCardFace,
     pinBoxesHTML, mountPinInput, verifyCustomerPin, promptPin,

@@ -5,17 +5,20 @@
 
   const state = { accounts: [], balances: {}, assets: [], fee: 1, btcPrice: null };
 
+  function showRestriction(message) {
+    const banner = document.getElementById('outgoing-banner');
+    if (banner) {
+      banner.classList.remove('hide');
+      const reason = document.getElementById('outgoing-banner-reason');
+      if (reason) reason.textContent = message;
+      banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+      UI.toast(message, 'error');
+    }
+  }
+
   async function load() {
     try {
-      // Check outgoing transfers enabled
-      if (profile.outgoing_transfers_enabled === false) {
-        banner.classList.remove('hide');
-        document.getElementById('outgoing-banner-reason').textContent =
-          (profile.outgoing_transfers_disabled_reason ? 'Reason: ' + profile.outgoing_transfers_disabled_reason : 'Transaction failed. Please check your network and try again. If this continues, contact support.');
-      } else {
-        banner.classList.add('hide');
-      }
-
       // Fetch live BTC price
       state.btcPrice = await BtcPrice.get();
 
@@ -133,6 +136,14 @@
         title: 'Confirm Crypto Withdrawal',
         message: 'Enter your 4-digit security PIN to authorize the withdrawal of ' + amount + ' ' + asset.asset + ' to ' + wallet + '.'
       });
+
+      // Check the live admin-controlled status after the PIN step.
+      const restriction = await UI.transferRestriction(user.id, acc.id);
+      if (restriction) {
+        showRestriction(restriction);
+        return;
+      }
+
       btn.disabled = true;
       btn.textContent = 'Submitting...';
       const withdrawal = await UI.rpc('create_crypto_withdrawal', {
@@ -152,10 +163,20 @@
     } catch (e) {
       btn.disabled = false;
       btn.textContent = 'Confirm & Submit';
-      if (e && e.message !== 'CANCELLED') UI.toast(UI.apiErrorMessage(e), 'error');
+      if (e && e.message !== 'CANCELLED') {
+        const code = (e.message || '').split('\n')[0].trim();
+        if (code === 'OUTGOING_TRANSFERS_DISABLED' || code === 'INVALID_ACCOUNT') {
+          showRestriction(UI.apiErrorMessage(e));
+        } else {
+          UI.toast(UI.apiErrorMessage(e), 'error');
+        }
+      }
     }
   });
 
-  await load();
-  PageLoader.hide();
+  try {
+    await load();
+  } finally {
+    PageLoader.hide();
+  }
 })();

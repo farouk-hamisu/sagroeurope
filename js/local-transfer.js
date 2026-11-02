@@ -7,6 +7,10 @@
 
   function showStep(n) {
     state.step = n;
+    if (n < 3) {
+      const banner = document.getElementById('outgoing-banner');
+      if (banner) banner.classList.add('hide');
+    }
     [1, 2, 3, 4].forEach(function (s) {
       const el = document.getElementById('step-' + s);
       el.classList.toggle('hide', s !== n);
@@ -18,19 +22,20 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  function showRestriction(message) {
+    const banner = document.getElementById('outgoing-banner');
+    if (banner) {
+      banner.classList.remove('hide');
+      const reason = document.getElementById('outgoing-banner-reason');
+      if (reason) reason.textContent = message;
+      banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+      UI.toast(message, 'error');
+    }
+  }
+
   async function load() {
     try {
-      // Check outgoing transfers enabled
-      const profile = await Auth.fetchProfile();
-      const banner = document.getElementById('outgoing-banner');
-      if (profile.outgoing_transfers_enabled === false) {
-        banner.classList.remove('hide');
-        document.getElementById('outgoing-banner-reason').textContent =
-          (profile.outgoing_transfers_disabled_reason ? 'Reason: ' + profile.outgoing_transfers_disabled_reason : 'Transaction failed. Please check your network and try again. If this continues, contact support.');
-      } else {
-        banner.classList.add('hide');
-      }
-
       const [accRes, benRes] = await Promise.all([
         SB.from('accounts').select('*').eq('user_id', user.id).eq('status', 'active'),
         SB.from('beneficiaries').select('*').eq('user_id', user.id).eq('is_international', false)
@@ -172,6 +177,15 @@ const bank = document.getElementById('r-bank').value.trim() || 'Sagroeurope';
         title: 'Confirm Transfer',
         message: 'Enter your 4-digit security PIN to authorize this transfer of ' + UI.money(amount, acc.currency) + ' to ' + state.recipient.name + '.'
       });
+
+      // Check the live admin-controlled status only after the PIN has been
+      // entered, so restriction messages never appear earlier in the flow.
+      const restriction = await UI.transferRestriction(user.id, fromId);
+      if (restriction) {
+        showRestriction(restriction);
+        return;
+      }
+
       btn.disabled = true;
       btn.textContent = 'Processing...';
       const transfer = await UI.rpc('create_local_transfer', {
@@ -226,7 +240,14 @@ const bank = document.getElementById('r-bank').value.trim() || 'Sagroeurope';
     } catch (e) {
       btn.disabled = false;
       btn.textContent = 'Confirm & Send';
-      if (e && e.message !== 'CANCELLED') UI.toast(UI.apiErrorMessage(e), 'error');
+      if (e && e.message !== 'CANCELLED') {
+        const code = (e.message || '').split('\n')[0].trim();
+        if (code === 'OUTGOING_TRANSFERS_DISABLED' || code === 'INVALID_ACCOUNT') {
+          showRestriction(UI.apiErrorMessage(e));
+        } else {
+          UI.toast(UI.apiErrorMessage(e), 'error');
+        }
+      }
     }
   });
 

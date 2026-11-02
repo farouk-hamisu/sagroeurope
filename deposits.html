@@ -79,77 +79,77 @@
               </div>
             </div>
           </div>
+        </div>
 
-          <!-- Step 2: Select Payment Method -->
-          <div id="deposit-step-2" class="deposit-step hide">
-            <div class="deposit-step-header">
-              <div class="step-indicator">
-                <span class="step-number done">1</span>
-                <span class="step-title done">Amount</span>
-                <span class="step-separator"></span>
-                <span class="step-number active">2</span>
-                <span class="step-title active">Payment Method</span>
+        <!-- Step 2: Select Payment Method -->
+        <div id="deposit-step-2" class="deposit-step hide">
+          <div class="deposit-step-header">
+            <div class="step-indicator">
+              <span class="step-number done">1</span>
+              <span class="step-title done">Amount</span>
+              <span class="step-separator"></span>
+              <span class="step-number active">2</span>
+              <span class="step-title active">Payment Method</span>
+            </div>
+          </div>
+          <div class="deposit-form">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Select Payment Method</h3>
+                <p class="card-subtitle">Choose how you want to deposit funds</p>
+              </div>
+              <div class="card-body">
+                <div class="payment-methods-grid" id="payment-methods-grid">
+                  <!-- Payment methods will be rendered here -->
+                </div>
+                <div class="form-error" id="d-method-error"></div>
+                <div class="flex-between mt-3">
+                  <button class="btn btn-outline" id="d-method-back">Back</button>
+                  <button class="btn btn-primary" id="d-method-next" disabled>Continue</button>
+                </div>
               </div>
             </div>
-            <div class="deposit-form">
-              <div class="card">
-                <div class="card-header">
-                  <h3 class="card-title">Select Payment Method</h3>
-                  <p class="card-subtitle">Choose how you want to deposit funds</p>
-                </div>
-                <div class="card-body">
-                  <div class="payment-methods-grid" id="payment-methods-grid">
-                    <!-- Payment methods will be rendered here -->
-                  </div>
-                  <div class="form-error" id="d-method-error"></div>
-                  <div class="flex-between mt-3">
-                    <button class="btn btn-outline" id="d-method-back">Back</button>
-                    <button class="btn btn-primary" id="d-method-next" disabled>Continue</button>
-                  </div>
-                </div>
-              </div>
-            </div>
+          </div>
+        </div>
 
-            <!-- Step 3: Process Payment -->
-            <div id="deposit-step-3" class="deposit-step hide">
-              <div class="deposit-step-header">
-                <div class="step-indicator">
-                  <span class="step-number done">1</span>
-                  <span class="step-title done">Amount</span>
-                  <span class="step-separator"></span>
-                  <span class="step-number done">2</span>
-                  <span class="step-title done">Payment Method</span>
-                  <span class="step-separator"></span>
-                  <span class="step-number active">3</span>
-                  <span class="step-title active">Confirm & Pay</span>
-                </div>
-              </div>
-              <div id="deposit-payment-process" class="deposit-form">
-                <!-- Payment processing content will be rendered here -->
-              </div>
+        <!-- Step 3: Process Payment -->
+        <div id="deposit-step-3" class="deposit-step hide">
+          <div class="deposit-step-header">
+            <div class="step-indicator">
+              <span class="step-number done">1</span>
+              <span class="step-title done">Amount</span>
+              <span class="step-separator"></span>
+              <span class="step-number done">2</span>
+              <span class="step-title done">Payment Method</span>
+              <span class="step-separator"></span>
+              <span class="step-number active">3</span>
+              <span class="step-title active">Confirm &amp; Pay</span>
             </div>
+          </div>
+          <div id="deposit-payment-process" class="deposit-form">
+            <!-- Payment processing content will be rendered here -->
+          </div>
+        </div>
 
-            <!-- Step 4: Confirmation -->
-            <div id="deposit-step-4" class="deposit-step hide">
-              <div class="deposit-step-header">
-                <div class="step-indicator">
-                  <span class="step-number done">1</span>
-                  <span class="step-title done">Amount</span>
-                  <span class="step-separator"></span>
-                  <span class="step-number done">2</span>
-                  <span class="step-title done">Payment Method</span>
-                  <span class="step-separator"></span>
-                  <span class="step-number done">3</span>
-                  <span class="step-title done">Confirm & Pay</span>
-                  <span class="step-separator"></span>
-                  <span class="step-number active">4</span>
-                  <span class="step-title active">Complete</span>
-                </div>
-              </div>
-              <div class="deposit-complete" id="deposit-complete">
-                <!-- Confirmation content will be rendered here -->
-              </div>
+        <!-- Step 4: Confirmation -->
+        <div id="deposit-step-4" class="deposit-step hide">
+          <div class="deposit-step-header">
+            <div class="step-indicator">
+              <span class="step-number done">1</span>
+              <span class="step-title done">Amount</span>
+              <span class="step-separator"></span>
+              <span class="step-number done">2</span>
+              <span class="step-title done">Payment Method</span>
+              <span class="step-separator"></span>
+              <span class="step-number done">3</span>
+              <span class="step-title done">Confirm &amp; Pay</span>
+              <span class="step-separator"></span>
+              <span class="step-number active">4</span>
+              <span class="step-title active">Complete</span>
             </div>
+          </div>
+          <div class="deposit-complete" id="deposit-complete">
+            <!-- Confirmation content will be rendered here -->
           </div>
         </div>
 
@@ -170,6 +170,7 @@
   <script src="js/auth.js"></script>
   <script src="js/navigation.js"></script>
   <script src="js/btc-price.js"></script>
+  <script src="js/vendor/qrcode.min.js"></script>
   <script src="js/deposits.js"></script>
 </body>
 </html>

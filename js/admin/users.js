@@ -121,7 +121,7 @@
             await adminApi('admin_toggle_outgoing_transfers', {
               p_user_id: id,
               p_enabled: !currentlyEnabled,
-              p_reason: currentlyEnabled ? 'Disabled by admin' : null
+              p_reason: currentlyEnabled ? 'Outgoing transfers disabled by administrator' : null
             });
             UI.toast('Transfers ' + action + 'd.', 'success');
             load();

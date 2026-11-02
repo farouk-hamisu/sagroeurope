@@ -17,11 +17,6 @@ security definer
 set search_path = public, extensions
 as $$
 declare
-  v_admin public.admin_users;
-  v_where text := '';
-  v_params text[] := array[];
-  v_query text;
-  v_count_query text;
   v_total int;
   v_rows jsonb;
 begin
@@ -29,44 +24,65 @@ begin
     raise exception 'FORBIDDEN';
   end if;
 
-  v_admin := public.admin_from_token(p_token);
+  with all_deposits as (
+    select d.id, d.reference, d.user_id, d.account_id, d.amount, d.currency, d.method,
+           d.status, d.note, d.created_at, d.updated_at, d.payment_method,
+           d.proof_image_url, d.verified_at,
+           'fiat'::text as type, null::text as asset, null::text as network,
+           null::text as address, null::text as tx_hash, null::numeric as amount_crypto,
+           d.amount as amount_fiat, p.full_name as user_name, p.email as user_email
+    from public.deposits d
+    join public.profiles p on p.id = d.user_id
+    union all
+    select cd.id, cd.reference, cd.user_id, cd.account_id, cd.amount, cd.currency, cd.asset as method,
+           cd.status, null::text, cd.created_at, cd.updated_at, null::text,
+           cd.proof_image_url, cd.verified_at,
+           'crypto'::text, cd.asset, cd.network, cd.address, cd.tx_hash,
+           coalesce(cd.amount_crypto, cd.amount), cd.amount_fiat,
+           p.full_name, p.email
+    from public.crypto_deposits cd
+    join public.profiles p on p.id = cd.user_id
+  )
+  select count(*) into v_total
+  from all_deposits
+  where (p_search is null or p_search = '' or reference ilike '%' || p_search || '%'
+         or user_email ilike '%' || p_search || '%' or user_name ilike '%' || p_search || '%'
+         or asset ilike '%' || p_search || '%')
+    and (p_status is null or p_status = '' or status = p_status)
+    and (p_type is null or p_type = '' or type = p_type)
+    and (p_asset is null or p_asset = '' or asset = p_asset or currency = p_asset);
 
-  -- Build dynamic query
-  v_where := 'where 1=1';
-  v_params := array[];
-
-  if p_search is not null and p_search <> '' then
-    v_where := v_where || ' and (d.reference ilike $' || array_length(v_params, 1) + 1 || ' or u.email ilike $' || array_length(v_params, 1) + 1 || ' or u.full_name ilike $' || array_length(v_params, 1) + 1 || ')';
-    v_params := v_params || '%' || p_search || '%';
-  end if;
-
-  if p_status is not null and p_status <> '' then
-    v_where := v_where || ' and d.status = $' || array_length(v_params, 1) + 1;
-    v_params := v_params || p_status;
-  end if;
-
-  if p_type is not null and p_type <> '' then
-    if p_type = 'fiat' then
-      v_where := v_where || ' and d.type is distinct from ''crypto''';
-    elsif p_type = 'crypto' then
-      v_where := v_where || ' and d.type = ''crypto''';
-    end if;
-  end if;
-
-  if p_asset is not null and p_asset <> '' then
-    v_where := v_where || ' and (d.asset = $' || array_length(v_params, 1) + 1 || ' or d.currency = $' || array_length(v_params, 1) + 1 || ')';
-    v_params := v_params || p_asset;
-  end if;
-
-  -- Count total
-  v_count_query := 'select count(*) from (select d.*, u.email as user_email, u.full_name as user_name from public.deposits d join public.profiles u on u.id = d.user_id ' || v_where || ') q';
-  execute format(v_count_query) using v_params into v_total;
-
-  -- Fetch rows
-  v_query := 'select d.*, u.email as user_email, u.full_name as user_name from public.deposits d join public.profiles u on u.id = d.user_id ' || v_where || ' order by d.created_at desc limit $' || array_length(v_params, 1) + 1 || ' offset $' || array_length(v_params, 1) + 2;
-  v_params := v_params || array[12, 0]::int[]; -- placeholder for limit/offset
-
-  execute format(v_query) using v_params into v_rows;
+  with all_deposits as (
+    select d.id, d.reference, d.user_id, d.account_id, d.amount, d.currency, d.method,
+           d.status, d.note, d.created_at, d.updated_at, d.payment_method,
+           d.proof_image_url, d.verified_at,
+           'fiat'::text as type, null::text as asset, null::text as network,
+           null::text as address, null::text as tx_hash, null::numeric as amount_crypto,
+           d.amount as amount_fiat, p.full_name as user_name, p.email as user_email
+    from public.deposits d
+    join public.profiles p on p.id = d.user_id
+    union all
+    select cd.id, cd.reference, cd.user_id, cd.account_id, cd.amount, cd.currency, cd.asset as method,
+           cd.status, null::text, cd.created_at, cd.updated_at, null::text,
+           cd.proof_image_url, cd.verified_at,
+           'crypto'::text, cd.asset, cd.network, cd.address, cd.tx_hash,
+           coalesce(cd.amount_crypto, cd.amount), cd.amount_fiat,
+           p.full_name, p.email
+    from public.crypto_deposits cd
+    join public.profiles p on p.id = cd.user_id
+  )
+  select coalesce(jsonb_agg(to_jsonb(q)), '[]') into v_rows
+  from (
+    select * from all_deposits
+    where (p_search is null or p_search = '' or reference ilike '%' || p_search || '%'
+           or user_email ilike '%' || p_search || '%' or user_name ilike '%' || p_search || '%'
+           or asset ilike '%' || p_search || '%')
+      and (p_status is null or p_status = '' or status = p_status)
+      and (p_type is null or p_type = '' or type = p_type)
+      and (p_asset is null or p_asset = '' or asset = p_asset or currency = p_asset)
+    order by created_at desc
+    limit coalesce(p_limit, 12) offset coalesce(p_offset, 0)
+  ) q;
 
   return jsonb_build_object(
     'rows', v_rows,
@@ -75,7 +91,7 @@ begin
 end;
 $$;
 
-grant execute on function public.admin_list_deposits(text, text, text, text, int, int) to anon, authenticated;
+grant execute on function public.admin_list_deposits(text, text, text, text, text, int, int) to anon, authenticated;
 
 -- Admin: update deposit status
 create or replace function public.admin_update_deposit_status(

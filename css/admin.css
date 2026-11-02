@@ -95,3 +95,58 @@
 
 /* charts */
 .chart-box { height: 260px; }
+
+/* deposit settings */
+.deposit-settings-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.deposit-settings-page .card-header {
+  gap: 12px;
+}
+.deposit-settings-page .card-header .btn {
+  flex: 0 0 auto;
+}
+.switch-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+.switch-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+}
+.deposit-method-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  color: var(--muted);
+}
+.deposit-address-cell {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+}
+.deposit-warning {
+  color: var(--warning);
+  font-size: 11px;
+  font-weight: 600;
+}
+.deposit-config-modal .form-grid {
+  grid-template-columns: 1fr 1fr;
+}
+.deposit-config-modal .field-full {
+  grid-column: 1 / -1;
+}
+@media (max-width: 640px) {
+  .deposit-config-modal .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
